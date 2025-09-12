@@ -52,6 +52,8 @@ export function sendOrderToWhatsApp(orderData: OrderData): void {
 
   const currentPrices = getCurrentPrices();
   const transferFeePercentage = currentPrices.transferFeePercentage;
+  const isPickup = customerInfo.pickupOption === 'pickup' || deliveryZone === 'Recogida en el local - TV a la Carta';
+  
   // Formatear lista de productos
   const itemsList = items
     .map(item => {
@@ -61,9 +63,24 @@ export function sendOrderToWhatsApp(orderData: OrderData): void {
       const itemType = item.type === 'movie' ? 'Película' : 'Serie';
       const basePrice = item.type === 'movie' ? currentPrices.moviePrice : (item.selectedSeasons?.length || 1) * currentPrices.seriesPrice;
       const finalPrice = item.paymentType === 'transfer' ? Math.round(basePrice * (1 + transferFeePercentage / 100)) : basePrice;
-      const paymentTypeText = item.paymentType === 'transfer' ? `Transferencia (+${transferFeePercentage}%)` : 'Efectivo';
+      const paymentTypeText = item.paymentType === 'transfer' 
+        ? `🏦 Transferencia (+${transferFeePercentage}% recargo)` 
+        : '💵 Efectivo (sin recargo)';
       const emoji = item.type === 'movie' ? '🎬' : '📺';
-      return `${emoji} *${item.title}*${seasonInfo}\n  📋 Tipo: ${itemType}\n  💳 Pago: ${paymentTypeText}\n  💰 Precio: $${finalPrice.toLocaleString()} CUP`;
+      
+      let itemDetails = `${emoji} *${item.title}*${seasonInfo}\n`;
+      itemDetails += `  📋 Tipo: ${itemType}\n`;
+      itemDetails += `  💳 Método de pago: ${paymentTypeText}\n`;
+      
+      if (item.paymentType === 'transfer') {
+        itemDetails += `  💰 Precio base: $${basePrice.toLocaleString()} CUP\n`;
+        itemDetails += `  💳 Recargo (${transferFeePercentage}%): +$${(finalPrice - basePrice).toLocaleString()} CUP\n`;
+        itemDetails += `  💰 Precio final: $${finalPrice.toLocaleString()} CUP`;
+      } else {
+        itemDetails += `  💰 Precio: $${finalPrice.toLocaleString()} CUP (sin recargo)`;
+      }
+      
+      return itemDetails;
     })
     .join('\n\n');
 
@@ -78,66 +95,89 @@ export function sendOrderToWhatsApp(orderData: OrderData): void {
   
   message += `🎯 *PRODUCTOS SOLICITADOS:*\n${itemsList}\n\n`;
   
-  message += `💰 *RESUMEN DE COSTOS:*\n`;
+  message += `💰 *DESGLOSE DETALLADO DE COSTOS:*\n`;
   
   // Desglosar por tipo de pago
   const cashItems = items.filter(item => item.paymentType === 'cash');
   const transferItems = items.filter(item => item.paymentType === 'transfer');
   
-  // Mostrar desglose detallado por tipo de pago
-  message += `\n📊 *DESGLOSE POR TIPO DE PAGO:*\n`;
-  
   if (cashItems.length > 0) {
-    message += `💵 *EFECTIVO:*\n`;
+    message += `💵 *PAGO EN EFECTIVO (${cashItems.length} títulos):*\n`;
     cashItems.forEach(item => {
       const basePrice = item.type === 'movie' ? currentPrices.moviePrice : (item.selectedSeasons?.length || 1) * currentPrices.seriesPrice;
       const emoji = item.type === 'movie' ? '🎬' : '📺';
-      message += `  ${emoji} ${item.title}: $${basePrice.toLocaleString()} CUP\n`;
+      message += `  ${emoji} ${item.title}: $${basePrice.toLocaleString()} CUP (sin recargo)\n`;
     });
-    message += `  💰 *Subtotal Efectivo: $${cashTotal.toLocaleString()} CUP*\n\n`;
+    message += `  ✅ *Subtotal Efectivo: $${cashTotal.toLocaleString()} CUP*\n\n`;
   }
   
   if (transferItems.length > 0) {
-    message += `🏦 *TRANSFERENCIA (+${transferFeePercentage}%):*\n`;
+    message += `🏦 *PAGO POR TRANSFERENCIA (${transferItems.length} títulos, +${transferFeePercentage}% recargo):*\n`;
     transferItems.forEach(item => {
       const basePrice = item.type === 'movie' ? currentPrices.moviePrice : (item.selectedSeasons?.length || 1) * currentPrices.seriesPrice;
       const finalPrice = Math.round(basePrice * (1 + transferFeePercentage / 100));
+      const recargo = finalPrice - basePrice;
       const emoji = item.type === 'movie' ? '🎬' : '📺';
-      message += `  ${emoji} ${item.title}: $${basePrice.toLocaleString()} → $${finalPrice.toLocaleString()} CUP\n`;
+      message += `  ${emoji} ${item.title}:\n`;
+      message += `    💰 Precio base: $${basePrice.toLocaleString()} CUP\n`;
+      message += `    💳 Recargo (${transferFeePercentage}%): +$${recargo.toLocaleString()} CUP\n`;
+      message += `    ✅ Total: $${finalPrice.toLocaleString()} CUP\n`;
     });
-    message += `  💰 *Subtotal Transferencia: $${transferTotal.toLocaleString()} CUP*\n\n`;
+    message += `  ✅ *Subtotal Transferencia: $${transferTotal.toLocaleString()} CUP*\n\n`;
   }
   
-  message += `📋 *RESUMEN FINAL:*\n`;
+  message += `📊 *RESUMEN FINAL DE PAGOS:*\n`;
+  message += `═══════════════════════════════════\n`;
   if (cashTotal > 0) {
-    message += `• Efectivo: $${cashTotal.toLocaleString()} CUP (${cashItems.length} elementos)\n`;
+    message += `💵 *Pago en Efectivo:*\n`;
+    message += `  • Cantidad de títulos: ${cashItems.length}\n`;
+    message += `  • Total sin recargo: $${cashTotal.toLocaleString()} CUP\n\n`;
   }
   if (transferTotal > 0) {
-    message += `• Transferencia: $${transferTotal.toLocaleString()} CUP (${transferItems.length} elementos)\n`;
+    const transferBase = transferItems.reduce((sum, item) => {
+      const basePrice = item.type === 'movie' ? currentPrices.moviePrice : (item.selectedSeasons?.length || 1) * currentPrices.seriesPrice;
+      return sum + basePrice;
+    }, 0);
+    const totalRecargo = transferTotal - transferBase;
+    
+    message += `🏦 *Pago por Transferencia:*\n`;
+    message += `  • Cantidad de títulos: ${transferItems.length}\n`;
+    message += `  • Subtotal base: $${transferBase.toLocaleString()} CUP\n`;
+    message += `  • Recargo (${transferFeePercentage}%): +$${totalRecargo.toLocaleString()} CUP\n`;
+    message += `  • Total con recargo: $${transferTotal.toLocaleString()} CUP\n\n`;
   }
-  message += `• *Subtotal Contenido: $${subtotal.toLocaleString()} CUP*\n`;
   
-  if (transferFee > 0) {
-    message += `• Recargo transferencia (${transferFeePercentage}%): +$${transferFee.toLocaleString()} CUP\n`;
+  message += `🎬 *TOTAL CONTENIDO: $${subtotal.toLocaleString()} CUP*\n`;
+  
+  // Información de entrega
+  message += `\n📍 *MÉTODO DE ENTREGA:*\n`;
+  if (isPickup) {
+    message += `🏪 *RECOGIDA EN EL LOCAL (GRATIS)*\n`;
+    message += `  • Ubicación: TV a la Carta\n`;
+    message += `  • Dirección: Reparto Nuevo Vista Alegre, Santiago de Cuba\n`;
+    message += `  • Coordenadas: 20.039585, -75.849663\n`;
+    message += `  • Costo de recogida: GRATIS\n`;
+    message += `  • Google Maps: https://www.google.com/maps/place/20%C2%B002'22.5%22N+75%C2%B050'58.8%22W/@20.0394604,-75.8495414,180m/data=!3m1!1e3!4m4!3m3!8m2!3d20.039585!4d-75.849663\n\n`;
+  } else {
+    message += `🚚 *ENTREGA A DOMICILIO*\n`;
+    message += `  • Zona: ${deliveryZone.replace(' > ', ' → ')}\n`;
+    message += `  • Costo de entrega: $${deliveryCost.toLocaleString()} CUP\n\n`;
   }
   
-  message += `🚚 Entrega (${deliveryZone.split(' > ')[2]}): +$${deliveryCost.toLocaleString()} CUP\n`;
-  message += `\n🎯 *TOTAL FINAL: $${total.toLocaleString()} CUP*\n\n`;
-  
-  message += `📍 *ZONA DE ENTREGA:*\n`;
-  message += `${deliveryZone.replace(' > ', ' → ')}\n`;
-  message += `💰 Costo de entrega: $${deliveryCost.toLocaleString()} CUP\n\n`;
+  message += `🎯 *TOTAL FINAL A PAGAR: $${total.toLocaleString()} CUP*\n`;
+  message += `═══════════════════════════════════\n\n`;
   
   message += `📊 *ESTADÍSTICAS DEL PEDIDO:*\n`;
   message += `• Total de elementos: ${items.length}\n`;
   message += `• Películas: ${items.filter(item => item.type === 'movie').length}\n`;
   message += `• Series: ${items.filter(item => item.type === 'tv').length}\n`;
   if (cashItems.length > 0) {
-    message += `• Pago en efectivo: ${cashItems.length} elementos\n`;
+    message += `• Pago en efectivo: ${cashItems.length} títulos ($${cashTotal.toLocaleString()} CUP)\n`;
   }
   if (transferItems.length > 0) {
-    message += `• Pago por transferencia: ${transferItems.length} elementos\n`;
+    message += `• Pago por transferencia: ${transferItems.length} títulos ($${transferTotal.toLocaleString()} CUP)\n`;
   }
+  message += `• Método de entrega: ${isPickup ? 'Recogida en local (GRATIS)' : 'Entrega a domicilio'}\n`;
   message += `\n`;
   
   message += `💼 *CONFIGURACIÓN DE PRECIOS APLICADA:*\n`;

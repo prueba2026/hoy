@@ -95,6 +95,45 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
+// State for real-time prices
+const [realTimePrices, setRealTimePrices] = useState(EMBEDDED_PRICES);
+
+// Listen for real-time updates from admin panel
+useEffect(() => {
+  const handleAdminConfigChange = (event: CustomEvent) => {
+    if (event.detail.prices) {
+      setRealTimePrices(event.detail.prices);
+    }
+  };
+  
+  // Load initial prices from localStorage or embedded
+  const loadInitialPrices = () => {
+    try {
+      const adminState = localStorage.getItem('admin_system_state');
+      if (adminState) {
+        const state = JSON.parse(adminState);
+        if (state.prices) {
+          setRealTimePrices(state.prices);
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn('Error loading prices from localStorage:', error);
+    }
+    
+    // Fallback to embedded prices
+    setRealTimePrices(EMBEDDED_PRICES);
+  };
+  
+  loadInitialPrices();
+  
+  window.addEventListener('admin_config_changed', handleAdminConfigChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('admin_config_changed', handleAdminConfigChange as EventListener);
+  };
+}, []);
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
   const [toast, setToast] = React.useState<{
@@ -205,10 +244,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const calculateItemPrice = (item: SeriesCartItem): number => {
-    // Use embedded prices
-    const moviePrice = EMBEDDED_PRICES.moviePrice;
-    const seriesPrice = EMBEDDED_PRICES.seriesPrice;
-    const transferFeePercentage = EMBEDDED_PRICES.transferFeePercentage;
+    // Use real-time prices
+    const moviePrice = realTimePrices.moviePrice;
+    const seriesPrice = realTimePrices.seriesPrice;
+    const transferFeePercentage = realTimePrices.transferFeePercentage;
     
     if (item.type === 'movie') {
       const basePrice = moviePrice;
@@ -227,9 +266,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const calculateTotalByPaymentType = (): { cash: number; transfer: number } => {
-    const moviePrice = EMBEDDED_PRICES.moviePrice;
-    const seriesPrice = EMBEDDED_PRICES.seriesPrice;
-    const transferFeePercentage = EMBEDDED_PRICES.transferFeePercentage;
+    const moviePrice = realTimePrices.moviePrice;
+    const seriesPrice = realTimePrices.seriesPrice;
+    const transferFeePercentage = realTimePrices.transferFeePercentage;
     
     return state.items.reduce((totals, item) => {
       const basePrice = item.type === 'movie' ? moviePrice : (item.selectedSeasons?.length || 1) * seriesPrice;

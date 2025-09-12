@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, MapPin, User, Phone, Home, CreditCard, DollarSign, MessageCircle, Calculator, Truck } from 'lucide-react';
 
 // ZONAS DE ENTREGA EMBEBIDAS - Generadas automáticamente
-const EMBEDDED_DELIVERY_ZONES = [];
+const EMBEDDED_DELIVERY_ZONES: DeliveryZone[] = [];
 
 // PRECIOS EMBEBIDOS
 const EMBEDDED_PRICES = {
@@ -12,10 +12,17 @@ const EMBEDDED_PRICES = {
   "novelPricePerChapter": 5
 };
 
+interface DeliveryZone {
+  id: number;
+  name: string;
+  cost: number;
+}
+
 export interface CustomerInfo {
   fullName: string;
   phone: string;
   address: string;
+  pickupOption?: 'delivery' | 'pickup';
 }
 
 export interface OrderData {
@@ -53,14 +60,65 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
   const [selectedZone, setSelectedZone] = useState('');
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [errors, setErrors] = useState<Partial<CustomerInfo>>({});
+  const [realTimeZones, setRealTimeZones] = useState<DeliveryZone[]>([]);
+  const [pickupOption, setPickupOption] = useState<'delivery' | 'pickup'>('delivery');
+  const [showLocationMap, setShowLocationMap] = useState(false);
 
-  // Use embedded delivery zones
-  const deliveryZones = EMBEDDED_DELIVERY_ZONES;
+  // Listen for real-time updates from admin panel
+  useEffect(() => {
+    const handleAdminConfigChange = (event: CustomEvent) => {
+      if (event.detail.deliveryZones) {
+        setRealTimeZones(event.detail.deliveryZones);
+      }
+    };
+    
+    // Load initial zones from localStorage or embedded
+    const loadInitialZones = () => {
+      try {
+        const adminState = localStorage.getItem('admin_system_state');
+        if (adminState) {
+          const state = JSON.parse(adminState);
+          if (state.deliveryZones && state.deliveryZones.length > 0) {
+            setRealTimeZones(state.deliveryZones);
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('Error loading delivery zones from localStorage:', error);
+      }
+      
+      // Fallback to embedded zones
+      setRealTimeZones(EMBEDDED_DELIVERY_ZONES);
+    };
+    
+    loadInitialZones();
+    
+    window.addEventListener('admin_config_changed', handleAdminConfigChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('admin_config_changed', handleAdminConfigChange as EventListener);
+    };
+  }, []);
+
+  // Add pickup option to delivery zones
+  const deliveryZones = [
+    {
+      id: 0,
+      name: 'Recogida en el local - TV a la Carta',
+      cost: 0
+    },
+    ...realTimeZones
+  ];
 
   useEffect(() => {
-    if (selectedZone) {
+    if (selectedZone && selectedZone !== 'Recogida en el local - TV a la Carta') {
       const zone = deliveryZones.find(z => z.name === selectedZone);
       setDeliveryCost(zone ? zone.cost : 0);
+    } else if (selectedZone === 'Recogida en el local - TV a la Carta') {
+      setDeliveryCost(0);
+      setPickupOption('pickup');
+    } else {
+      setPickupOption('delivery');
     }
   }, [selectedZone, deliveryZones]);
 
@@ -100,7 +158,10 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
     const orderId = `TV-${Date.now()}`;
     const orderData: OrderData = {
       orderId,
-      customerInfo,
+      customerInfo: {
+        ...customerInfo,
+        pickupOption
+      },
       deliveryZone: selectedZone,
       deliveryCost,
       items,
@@ -215,7 +276,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
             <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <MapPin className="h-5 w-5 mr-2 text-green-600" />
-                Zona de Entrega
+                Opciones de Entrega
               </h3>
               
               {deliveryZones.length > 0 ? (
@@ -223,12 +284,19 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                   {deliveryZones.map((zone) => (
                     <label
                       key={zone.id}
-                      className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
+                      className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors relative ${
                         selectedZone === zone.name
-                          ? 'border-green-500 bg-green-50'
+                          ? zone.cost === 0 
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-green-500 bg-green-50'
                           : 'border-gray-300 hover:border-green-300'
                       }`}
                     >
+                      {zone.cost === 0 && (
+                        <div className="absolute -top-2 -right-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                          GRATIS
+                        </div>
+                      )}
                       <div className="flex items-center">
                         <input
                           type="radio"
@@ -236,17 +304,68 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                           value={zone.name}
                           checked={selectedZone === zone.name}
                           onChange={(e) => setSelectedZone(e.target.value)}
-                          className="mr-3 h-4 w-4 text-green-600 focus:ring-green-500"
+                          className={`mr-3 h-4 w-4 focus:ring-2 ${
+                            zone.cost === 0 
+                              ? 'text-blue-600 focus:ring-blue-500'
+                              : 'text-green-600 focus:ring-green-500'
+                          }`}
                         />
                         <div>
                           <p className="font-medium text-gray-900">{zone.name}</p>
+                          {zone.cost === 0 && (
+                            <p className="text-sm text-blue-600 font-medium">
+                              📍 Reparto Nuevo Vista Alegre, Santiago de Cuba
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-green-600">${zone.cost.toLocaleString()} CUP</p>
+                        <p className={`font-semibold ${
+                          zone.cost === 0 ? 'text-blue-600' : 'text-green-600'
+                        }`}>
+                          {zone.cost === 0 ? 'GRATIS' : `$${zone.cost.toLocaleString()} CUP`}
+                        </p>
                       </div>
                     </label>
                   ))}
+                  
+                  {/* Show location map option for pickup */}
+                  {selectedZone === 'Recogida en el local - TV a la Carta' && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-blue-900">Ubicación del Local</h4>
+                        <button
+                          type="button"
+                          onClick={() => setShowLocationMap(!showLocationMap)}
+                          className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                        >
+                          {showLocationMap ? 'Ocultar mapa' : 'Ver ubicación'}
+                        </button>
+                      </div>
+                      
+                      {showLocationMap && (
+                        <div className="space-y-3">
+                          <div className="bg-white p-3 rounded-lg border border-blue-200">
+                            <p className="text-sm text-gray-700 mb-2">
+                              <strong>Dirección:</strong> Reparto Nuevo Vista Alegre, Santiago de Cuba
+                            </p>
+                            <p className="text-sm text-gray-700 mb-3">
+                              <strong>Coordenadas:</strong> 20.039585, -75.849663
+                            </p>
+                            <a
+                              href="https://www.google.com/maps/place/20%C2%B002'22.5%22N+75%C2%B050'58.8%22W/@20.0394604,-75.8495414,180m/data=!3m1!1e3!4m4!3m3!8m2!3d20.039585!4d-75.849663?entry=ttu&g_ep=EgoyMDI1MDczMC4wIKXMDSoASAFQAw%3D%3D"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <MapPin className="h-4 w-4 mr-2" />
+                              Abrir en Google Maps
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8">

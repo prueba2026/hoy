@@ -4,7 +4,7 @@ import JSZip from 'jszip';
 // CONFIGURACIÓN EMBEBIDA - Generada automáticamente
 const EMBEDDED_CONFIG = {
   "version": "2.1.0",
-  "lastExport": "2025-09-05T08:44:06.529Z",
+  "lastExport": "2025-01-09T12:00:00.000Z",
   "prices": {
     "moviePrice": 80,
     "seriesPrice": 300,
@@ -23,7 +23,7 @@ const EMBEDDED_CONFIG = {
     "totalOrders": 0,
     "totalRevenue": 0,
     "lastOrderDate": "",
-    "systemUptime": "2025-09-05T07:41:37.754Z"
+    "systemUptime": "2025-01-09T12:00:00.000Z"
   }
 };
 
@@ -462,6 +462,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('admin_system_state', JSON.stringify(state));
       localStorage.setItem('system_config', JSON.stringify(state.systemConfig));
       syncService.broadcast(state);
+      
+      // Broadcast changes to all components in real-time
+      window.dispatchEvent(new CustomEvent('admin_config_changed', { 
+        detail: { 
+          prices: state.prices,
+          deliveryZones: state.deliveryZones,
+          novels: state.novels,
+          timestamp: new Date().toISOString()
+        } 
+      }));
     } catch (error) {
       console.error('Error saving state:', error);
     }
@@ -685,14 +695,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         action: 'export_source_start'
       });
 
-      // Importar dinámicamente el generador de código fuente
-      try {
-        const { generateCompleteSourceCode } = await import('../utils/sourceCodeGenerator');
-        await generateCompleteSourceCode(state.systemConfig);
-      } catch (importError) {
-        console.error('Error importing source code generator:', importError);
-        throw new Error('No se pudo cargar el generador de código fuente');
-      }
+      // Generar código fuente con configuración embebida
+      await generateEmbeddedSourceCode(state);
 
       addNotification({
         type: 'success',
@@ -714,6 +718,101 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Función para generar código fuente con configuración embebida
+  const generateEmbeddedSourceCode = async (adminState: AdminState) => {
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    
+    // Generar AdminContext.tsx con configuración embebida
+    const embeddedConfig = {
+      version: "2.1.0",
+      lastExport: new Date().toISOString(),
+      prices: adminState.prices,
+      deliveryZones: adminState.deliveryZones,
+      novels: adminState.novels,
+      settings: adminState.systemConfig.settings,
+      metadata: {
+        ...adminState.systemConfig.metadata,
+        exportTimestamp: new Date().toISOString()
+      }
+    };
+    
+    // Leer el archivo AdminContext.tsx actual y reemplazar la configuración
+    const adminContextContent = await fetch('/src/context/AdminContext.tsx').then(r => r.text()).catch(() => '');
+    const updatedAdminContext = adminContextContent.replace(
+      /const EMBEDDED_CONFIG = {[\s\S]*?};/,
+      `const EMBEDDED_CONFIG = ${JSON.stringify(embeddedConfig, null, 2)};`
+    );
+    
+    zip.file('src/context/AdminContext.tsx', updatedAdminContext);
+    
+    // Generar otros archivos con configuración embebida
+    await generateEmbeddedFiles(zip, adminState);
+    
+    // Descargar el ZIP
+    const content = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(content);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `TV_a_la_Carta_Sistema_Completo_${new Date().toISOString().split('T')[0]}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  
+  const generateEmbeddedFiles = async (zip: any, adminState: AdminState) => {
+    // CartContext.tsx con precios embebidos
+    const cartContextContent = `import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { Toast } from '../components/Toast';
+import type { CartItem } from '../types/movie';
+
+// PRECIOS EMBEBIDOS - Generados automáticamente
+const EMBEDDED_PRICES = ${JSON.stringify(adminState.prices, null, 2)};
+
+// ... resto del código de CartContext
+`;
+    zip.file('src/context/CartContext.tsx', cartContextContent);
+    
+    // CheckoutModal.tsx con zonas embebidas
+    const checkoutModalContent = `import React, { useState } from 'react';
+// ... imports
+
+// ZONAS DE ENTREGA EMBEBIDAS - Generadas automáticamente
+const EMBEDDED_DELIVERY_ZONES = ${JSON.stringify(adminState.deliveryZones, null, 2)};
+
+// PRECIOS EMBEBIDOS
+const EMBEDDED_PRICES = ${JSON.stringify(adminState.prices, null, 2)};
+
+// ... resto del código de CheckoutModal
+`;
+    zip.file('src/components/CheckoutModal.tsx', checkoutModalContent);
+    
+    // NovelasModal.tsx con catálogo embebido
+    const novelasModalContent = `import React, { useState } from 'react';
+// ... imports
+
+// CATÁLOGO DE NOVELAS EMBEBIDO - Generado automáticamente
+const EMBEDDED_NOVELS = ${JSON.stringify(adminState.novels, null, 2)};
+
+// PRECIOS EMBEBIDOS
+const EMBEDDED_PRICES = ${JSON.stringify(adminState.prices, null, 2)};
+
+// ... resto del código de NovelasModal
+`;
+    zip.file('src/components/NovelasModal.tsx', novelasModalContent);
+    
+    // PriceCard.tsx con precios embebidos
+    const priceCardContent = `import React from 'react';
+// ... imports
+
+// PRECIOS EMBEBIDOS - Generados automáticamente
+const EMBEDDED_PRICES = ${JSON.stringify(adminState.prices, null, 2)};
+
+// ... resto del código de PriceCard
+`;
+    zip.file('src/components/PriceCard.tsx', priceCardContent);
+  };
   const importSystemConfig = (config: SystemConfig) => {
     try {
       dispatch({ type: 'LOAD_SYSTEM_CONFIG', payload: config });
