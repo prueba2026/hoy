@@ -497,7 +497,7 @@ export function Cart() {
             <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100">
               <p className="text-sm text-green-700 text-center flex items-center justify-center">
                 <span className="mr-2">📱</span>
-                Complete sus datos y elija su método de entrega preferido
+                Complete sus datos para finalizar el pedido
               </p>
             </div>
           </div>

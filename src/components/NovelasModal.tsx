@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Download, MessageCircle, Phone, BookOpen, Info, Check, DollarSign, CreditCard, Calculator, Search, Filter, SortAsc, SortDesc, Smartphone } from 'lucide-react';
 
 // CATÁLOGO DE NOVELAS EMBEBIDO - Generado automáticamente
@@ -45,54 +45,15 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
   // Base novels list
   const defaultNovelas: Novela[] = [];
 
-  // State for real-time novels
-  const [realTimeNovels, setRealTimeNovels] = useState<Novela[]>([]);
-  
-  // Listen for real-time updates from admin panel
-  useEffect(() => {
-    const handleAdminConfigChange = (event: CustomEvent) => {
-      if (event.detail.novels) {
-        setRealTimeNovels(event.detail.novels);
-      }
-    };
-    
-    // Load initial novels from localStorage or embedded
-    const loadInitialNovels = () => {
-      try {
-        const adminState = localStorage.getItem('admin_system_state');
-        if (adminState) {
-          const state = JSON.parse(adminState);
-          if (state.novels && state.novels.length > 0) {
-            setRealTimeNovels(state.novels);
-            return;
-          }
-        }
-      } catch (error) {
-        console.warn('Error loading novels from localStorage:', error);
-      }
-      
-      // Fallback to embedded novels
-      setRealTimeNovels(adminNovels.map(novel => ({
-        id: novel.id,
-        titulo: novel.titulo,
-        genero: novel.genero,
-        capitulos: novel.capitulos,
-        año: novel.año,
-        descripcion: novel.descripcion
-      })));
-    };
-    
-    loadInitialNovels();
-    
-    window.addEventListener('admin_config_changed', handleAdminConfigChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('admin_config_changed', handleAdminConfigChange as EventListener);
-    };
-  }, []);
-
-  // Combine real-time novels with default novels
-  const allNovelas = [...defaultNovelas, ...realTimeNovels];
+  // Combine admin novels with default novels
+  const allNovelas = [...defaultNovelas, ...adminNovels.map(novel => ({
+    id: novel.id,
+    titulo: novel.titulo,
+    genero: novel.genero,
+    capitulos: novel.capitulos,
+    año: novel.año,
+    descripcion: novel.descripcion
+  }))];
 
   const phoneNumber = '+5354690878';
 
@@ -103,7 +64,7 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
   const uniqueYears = [...new Set(allNovelas.map(novela => novela.año))].sort((a, b) => b - a);
 
   // Initialize novels with default payment type
-  React.useEffect(() => {
+  useEffect(() => {
     const novelasWithDefaultPayment = allNovelas.map(novela => ({
       ...novela,
       paymentType: 'cash' as const
