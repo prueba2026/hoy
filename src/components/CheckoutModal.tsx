@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, MapPin, User, Phone, Home, CreditCard, DollarSign, MessageCircle, Calculator, Truck, ExternalLink } from 'lucide-react';
-
-// ZONAS DE ENTREGA EMBEBIDAS - Generadas automáticamente
-const EMBEDDED_DELIVERY_ZONES = [];
-
-// PRECIOS EMBEBIDOS
-const EMBEDDED_PRICES = {
-  "moviePrice": 80,
-  "seriesPrice": 300,
-  "transferFeePercentage": 10,
-  "novelPricePerChapter": 5
-};
+import { useCart } from '../context/CartContext';
 
 export interface CustomerInfo {
   fullName: string;
@@ -46,7 +36,23 @@ interface CheckoutModalProps {
   total: number;
 }
 
+// Validador de números de teléfono cubanos
+const validateCubanPhone = (phone: string): boolean => {
+  // Remover espacios, guiones y paréntesis
+  const cleanPhone = phone.replace(/[\s\-()]/g, '');
+  
+  // Patrones válidos para números cubanos
+  const patterns = [
+    /^(\+53|53)?[5-9]\d{7}$/, // Móviles: 5xxxxxxx, 6xxxxxxx, 7xxxxxxx, 8xxxxxxx, 9xxxxxxx
+    /^(\+53|53)?[2-4]\d{6,7}$/, // Fijos: 2xxxxxxx, 3xxxxxxx, 4xxxxxxx (7-8 dígitos)
+    /^(\+53|53)?7[0-9]\d{6}$/, // Números especiales que empiezan con 7
+  ];
+  
+  return patterns.some(pattern => pattern.test(cleanPhone));
+};
+
 export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: CheckoutModalProps) {
+  const { getCurrentPrices } = useCart();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     fullName: '',
     phone: '',
@@ -56,10 +62,50 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [pickupLocation, setPickupLocation] = useState(false);
   const [showLocationMap, setShowLocationMap] = useState(false);
-  const [errors, setErrors] = useState<Partial<CustomerInfo>>({});
+  const [errors, setErrors] = useState<Partial<CustomerInfo & { zone: string }>>({});
+  const [deliveryZones, setDeliveryZones] = useState<any[]>([]);
 
-  // Use embedded delivery zones
-  const deliveryZones = EMBEDDED_DELIVERY_ZONES;
+  // Load delivery zones from admin config
+  useEffect(() => {
+    const loadDeliveryZones = () => {
+      try {
+        const adminConfig = localStorage.getItem('system_config');
+        if (adminConfig) {
+          const config = JSON.parse(adminConfig);
+          if (config.deliveryZones) {
+            setDeliveryZones(config.deliveryZones);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading delivery zones:', error);
+      }
+    };
+
+    loadDeliveryZones();
+
+    // Listen for admin updates
+    const handleAdminStateChange = (event: CustomEvent) => {
+      if (event.detail.type === 'delivery_zone_add' || 
+          event.detail.type === 'delivery_zone_update' || 
+          event.detail.type === 'delivery_zone_delete') {
+        loadDeliveryZones();
+      }
+    };
+
+    const handleAdminFullSync = (event: CustomEvent) => {
+      if (event.detail.config?.deliveryZones) {
+        setDeliveryZones(event.detail.config.deliveryZones);
+      }
+    };
+
+    window.addEventListener('admin_state_change', handleAdminStateChange as EventListener);
+    window.addEventListener('admin_full_sync', handleAdminFullSync as EventListener);
+
+    return () => {
+      window.removeEventListener('admin_state_change', handleAdminStateChange as EventListener);
+      window.removeEventListener('admin_full_sync', handleAdminFullSync as EventListener);
+    };
+  }, []);
 
   // Agregar opción de recogida en el local
   const pickupOption = {
@@ -82,7 +128,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
   }, [selectedZone, deliveryZones]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<CustomerInfo> = {};
+    const newErrors: Partial<CustomerInfo & { zone: string }> = {};
 
     if (!customerInfo.fullName.trim()) {
       newErrors.fullName = 'El nombre completo es requerido';
@@ -90,12 +136,16 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
 
     if (!customerInfo.phone.trim()) {
       newErrors.phone = 'El teléfono es requerido';
-    } else if (!/^[+]?[0-9\s\-()]{8,}$/.test(customerInfo.phone)) {
-      newErrors.phone = 'Formato de teléfono inválido';
+    } else if (!validateCubanPhone(customerInfo.phone)) {
+      newErrors.phone = 'Número de teléfono cubano inválido (ej: +53 5469 0878, 54690878, 22345678)';
     }
 
     if (!pickupLocation && !customerInfo.address.trim()) {
       newErrors.address = 'La dirección es requerida para entrega a domicilio';
+    }
+
+    if (!selectedZone) {
+      newErrors.zone = 'Debe seleccionar una opción de entrega';
     }
 
     setErrors(newErrors);
@@ -106,11 +156,6 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
     e.preventDefault();
     
     if (!validateForm()) {
-      return;
-    }
-
-    if (!selectedZone) {
-      alert('Por favor selecciona una opción de entrega');
       return;
     }
 
@@ -135,6 +180,13 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
     setCustomerInfo(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleZoneChange = (value: string) => {
+    setSelectedZone(value);
+    if (errors.zone) {
+      setErrors(prev => ({ ...prev, zone: undefined }));
     }
   };
 
@@ -208,32 +260,34 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                     className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.phone ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="+53 5469 0878"
+                    placeholder="+53 5469 0878 o 54690878"
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
                   )}
+                  <p className="text-gray-500 text-xs mt-1">
+                    Formatos válidos: +53 5469 0878, 54690878, 22345678
+                  </p>
                 </div>
 
-                {!pickupLocation && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Dirección Completa *
-                    </label>
-                    <textarea
-                      value={customerInfo.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      rows={3}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                        errors.address ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Calle, número, entre calles, referencias..."
-                    />
-                    {errors.address && (
-                      <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-                    )}
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Dirección Completa {!pickupLocation && '*'}
+                  </label>
+                  <textarea
+                    value={customerInfo.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    rows={3}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+                      errors.address ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder={pickupLocation ? "Dirección opcional para contacto" : "Calle, número, entre calles, referencias..."}
+                    disabled={pickupLocation}
+                  />
+                  {errors.address && (
+                    <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -241,42 +295,83 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
             <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <MapPin className="h-5 w-5 mr-2 text-green-600" />
-                Opciones de Entrega
+                Opciones de Entrega *
               </h3>
               
+              {errors.zone && (
+                <p className="text-red-500 text-sm mb-4">{errors.zone}</p>
+              )}
+              
               <div className="space-y-3">
-                {allDeliveryOptions.map((option) => (
-                  <label
-                    key={option.id || option.name}
-                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedZone === (option.id === 'pickup' ? 'pickup' : option.name)
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-300 hover:border-green-300'
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        name="deliveryOption"
-                        value={option.id === 'pickup' ? 'pickup' : option.name}
-                        checked={selectedZone === (option.id === 'pickup' ? 'pickup' : option.name)}
-                        onChange={(e) => setSelectedZone(e.target.value)}
-                        className="mr-3 h-4 w-4 text-green-600 focus:ring-green-500"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">{option.name}</p>
-                        {option.id === 'pickup' && (
-                          <p className="text-sm text-gray-600">Reparto Nuevo Vista Alegre, Santiago de Cuba</p>
-                        )}
-                      </div>
+                {/* Pickup Option */}
+                <label
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedZone === 'pickup'
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-300 hover:border-green-300'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      name="deliveryOption"
+                      value="pickup"
+                      checked={selectedZone === 'pickup'}
+                      onChange={(e) => handleZoneChange(e.target.value)}
+                      className="mr-3 h-4 w-4 text-green-600 focus:ring-green-500"
+                    />
+                    <div>
+                      <p className="font-medium text-gray-900">Recogida en TV a la Carta</p>
+                      <p className="text-sm text-gray-600">Reparto Nuevo Vista Alegre, Santiago de Cuba</p>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-semibold ${option.cost === 0 ? 'text-green-600' : 'text-green-600'}`}>
-                        {option.cost === 0 ? 'GRATIS' : `$${option.cost.toLocaleString()} CUP`}
-                      </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-green-600">GRATIS</p>
+                  </div>
+                </label>
+
+                {/* Home Delivery Option */}
+                {deliveryZones.length > 0 && (
+                  <div className="border border-gray-300 rounded-lg overflow-hidden">
+                    <div className="bg-blue-50 p-3 border-b border-gray-300">
+                      <h4 className="font-medium text-blue-900 flex items-center">
+                        <Truck className="h-4 w-4 mr-2" />
+                        Entrega a Domicilio
+                      </h4>
                     </div>
-                  </label>
-                ))}
+                    <div className="max-h-48 overflow-y-auto">
+                      {deliveryZones.map((zone) => (
+                        <label
+                          key={zone.id}
+                          className={`flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0 cursor-pointer transition-colors hover:bg-blue-50 ${
+                            selectedZone === zone.name
+                              ? 'bg-blue-50 border-blue-200'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="deliveryOption"
+                              value={zone.name}
+                              checked={selectedZone === zone.name}
+                              onChange={(e) => handleZoneChange(e.target.value)}
+                              className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                            />
+                            <div>
+                              <p className="font-medium text-gray-900">{zone.name}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-blue-600">
+                              ${zone.cost.toLocaleString()} CUP
+                            </p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Location Map Option */}
@@ -310,7 +405,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                 </div>
               )}
 
-              {allDeliveryOptions.length === 1 && (
+              {deliveryZones.length === 0 && (
                 <div className="text-center py-8">
                   <Truck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -361,8 +456,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={!selectedZone}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center"
             >
               <MessageCircle className="h-5 w-5 mr-2" />
               Enviar Pedido por WhatsApp
