@@ -4,27 +4,20 @@ import JSZip from 'jszip';
 // CONFIGURACIÓN EMBEBIDA - Generada automáticamente
 const EMBEDDED_CONFIG = {
   "version": "2.1.0",
-  "lastExport": "2025-09-05T08:44:06.529Z",
+  "lastExport": "2025-09-16T20:59:03.224Z",
   "prices": {
-    "moviePrice": 80,
-    "seriesPrice": 300,
-    "transferFeePercentage": 10,
+    "moviePrice": 90,
+    "seriesPrice": 400,
+    "transferFeePercentage": 15,
     "novelPricePerChapter": 5
   },
   "deliveryZones": [
     {
-      "id": 1,
-      "name": "Santiago de Cuba > Santiago de Cuba > Centro Histórico",
-      "cost": 50,
-      "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
-    },
-    {
       "id": 2,
       "name": "Santiago de Cuba > Santiago de Cuba > Vista Alegre",
-      "cost": 30,
+      "cost": 50,
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-09-16T20:43:00.215Z"
     },
     {
       "id": 3,
@@ -35,16 +28,6 @@ const EMBEDDED_CONFIG = {
     }
   ],
   "novels": [
-    {
-      "id": 1,
-      "titulo": "La Casa de Papel",
-      "genero": "Drama",
-      "capitulos": 41,
-      "año": 2017,
-      "descripcion": "Un grupo de ladrones lleva a cabo el atraco perfecto a la Fábrica Nacional de Moneda y Timbre.",
-      "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
-    },
     {
       "id": 2,
       "titulo": "Elite",
@@ -84,6 +67,16 @@ const EMBEDDED_CONFIG = {
       "descripcion": "Un grupo de niños descubre fuerzas sobrenaturales y experimentos gubernamentales secretos.",
       "createdAt": "2025-01-01T00:00:00.000Z",
       "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "titulo": "nuevo ",
+      "genero": "drama",
+      "capitulos": 10,
+      "año": 2025,
+      "descripcion": "",
+      "id": 1758056343224,
+      "createdAt": "2025-09-16T20:59:03.224Z",
+      "updatedAt": "2025-09-16T20:59:03.224Z"
     }
   ],
   "settings": {
