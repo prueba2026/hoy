@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, TrendingUp, Star, Monitor, Filter, Calendar, Clock, Flame, Library, Play, Clapperboard, Sparkles } from 'lucide-react';
 import { tmdbService } from '../services/tmdb';
+import { useAdmin } from '../context/AdminContext';
 import { MovieCard } from '../components/MovieCard';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -12,11 +13,14 @@ import type { Movie, TVShow } from '../types/movie';
 type TrendingTimeWindow = 'day' | 'week';
 
 export function Home() {
+  const { state: adminState } = useAdmin();
   const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
   const [popularTVShows, setPopularTVShows] = useState<TVShow[]>([]);
   const [popularAnime, setPopularAnime] = useState<TVShow[]>([]);
   const [trendingContent, setTrendingContent] = useState<(Movie | TVShow)[]>([]);
   const [heroItems, setHeroItems] = useState<(Movie | TVShow)[]>([]);
+  const [novelasEnTransmision, setNovelasEnTransmision] = useState<any[]>([]);
+  const [novelasFinalizadas, setNovelasFinalizadas] = useState<any[]>([]);
   const [trendingTimeWindow, setTrendingTimeWindow] = useState<TrendingTimeWindow>('day');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +36,42 @@ export function Home() {
     try {
       const response = await tmdbService.getTrendingAll(timeWindow, 1);
       const uniqueContent = tmdbService.removeDuplicates(response.results);
-      setTrendingContent(uniqueContent.slice(0, 12));
+      
+      // Get novels from admin state
+      const novelasTransmision = adminState.novels.filter(novel => novel.estado === 'transmision');
+      const novelasFinalizadasList = adminState.novels.filter(novel => novel.estado === 'finalizada');
+      
+      // Convert novels to display format
+      const novelasForTrending = timeWindow === 'day' ? novelasTransmision : novelasFinalizadasList;
+      const novelasAsContent = novelasForTrending.map(novel => ({
+        id: novel.id,
+        title: novel.titulo,
+        name: novel.titulo,
+        overview: novel.descripcion || '',
+        poster_path: novel.foto || null,
+        backdrop_path: novel.foto || null,
+        first_air_date: `${novel.año}-01-01`,
+        vote_average: 8.5,
+        vote_count: 100,
+        genre_ids: [18], // Drama genre ID
+        adult: false,
+        original_language: 'es',
+        popularity: 100,
+        type: 'novel',
+        country: novel.pais,
+        status: novel.estado,
+        chapters: novel.capitulos,
+        genre: novel.genero
+      }));
+      
+      // Combine TMDB content with novels
+      const combinedContent = [...novelasAsContent, ...uniqueContent];
+      setTrendingContent(combinedContent.slice(0, 12));
+      
+      // Update novel states for other sections
+      setNovelasEnTransmision(novelasTransmision);
+      setNovelasFinalizadas(novelasFinalizadasList);
+      
       setLastUpdate(new Date());
     } catch (err) {
       console.error('Error fetching trending content:', err);
@@ -201,7 +240,7 @@ export function Home() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center">
               <Flame className="mr-2 h-6 w-6 text-red-500" />
-              En Tendencia
+              En Tendencia {trendingTimeWindow === 'day' ? '(Novelas en Transmisión)' : '(Novelas Finalizadas)'}
             </h2>
             
             {/* Trending Filter */}
@@ -227,9 +266,15 @@ export function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {trendingContent.map((item) => {
-              const itemType = 'title' in item ? 'movie' : 'tv';
+              const itemType = (item as any).type === 'novel' ? 'tv' : ('title' in item ? 'movie' : 'tv');
+              const isNovelItem = (item as any).type === 'novel';
               return (
-                <MovieCard key={`trending-${itemType}-${item.id}`} item={item} type={itemType} />
+                <MovieCard 
+                  key={`trending-${itemType}-${item.id}`} 
+                  item={item} 
+                  type={itemType} 
+                  isNovel={isNovelItem}
+                />
               );
             })}
           </div>

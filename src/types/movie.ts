@@ -152,6 +152,9 @@ export interface NovelCartItem {
   paymentType: 'cash' | 'transfer';
   pricePerChapter: number;
   totalPrice: number;
+  country?: string;
+  status?: 'transmision' | 'finalizada';
+  photo?: string;
 }
 
 export type AllCartItems = CartItem | NovelCartItem;

@@ -369,17 +369,17 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                       </h4>
                       <p className="text-sm text-blue-700 ml-12 mt-1">Selecciona tu zona de entrega</p>
                     </div>
-                    <div className="max-h-64 overflow-y-auto bg-white">
+                    <div className="max-h-48 sm:max-h-64 overflow-y-auto bg-white">
                       {deliveryZones.map((zone) => (
                         <label
                           key={zone.id}
-                          className={`group flex items-center justify-between p-5 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 ${
+                          className={`group flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 space-y-2 sm:space-y-0 ${
                             selectedZone === zone.name
                               ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-inner'
                               : ''
                           }`}
                         >
-                          <div className="flex items-center">
+                          <div className="flex items-center justify-center sm:justify-start">
                             <div className={`mr-4 p-2 rounded-full transition-all duration-300 ${
                               selectedZone === zone.name
                                 ? 'bg-blue-500 text-white shadow-lg'
@@ -408,7 +408,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                               </p>
                             </div>
                           </div>
-                          <div className="text-right flex flex-col items-end">
+                          <div className="text-center sm:text-right flex flex-col items-center sm:items-end">
                             <div className={`px-4 py-2 rounded-full font-bold transition-all duration-300 ${
                               selectedZone === zone.name
                                 ? 'bg-blue-500 text-white shadow-lg'
@@ -427,7 +427,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
 
               {/* Location Map Option */}
               {pickupLocation && (
-                <div className="mt-6 p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-lg">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
                     <div>
                       <h4 className="font-bold text-blue-900 text-base sm:text-lg flex items-center">
@@ -451,7 +451,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                       <button
                         type="button"
                         onClick={openLocationMap}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center w-full sm:w-auto"
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center w-full sm:w-auto"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
                         🗺️ Ver Mapa
