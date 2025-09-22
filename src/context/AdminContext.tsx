@@ -4,79 +4,301 @@ import JSZip from 'jszip';
 // CONFIGURACIÓN EMBEBIDA - Generada automáticamente
 const EMBEDDED_CONFIG = {
   "version": "2.1.0",
-  "lastExport": "2025-09-16T20:59:03.224Z",
+  "lastExport": "2025-09-05T08:44:06.529Z",
   "prices": {
-    "moviePrice": 90,
-    "seriesPrice": 400,
-    "transferFeePercentage": 15,
+    "moviePrice": 100,
+    "seriesPrice": 300,
+    "transferFeePercentage": 10,
     "novelPricePerChapter": 5
   },
   "deliveryZones": [
     {
-      "id": 2,
-      "name": "Santiago de Cuba > Santiago de Cuba > Vista Alegre",
-      "cost": 50,
+      "id": 1,
+      "name": "Santiago de Cuba > Vista Hermosa",
+      "cost": 400,
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-09-16T20:43:00.215Z"
+      "updatedAt": "2025-09-17T09:20:53.160Z"
+    },
+    {
+      "id": 2,
+      "name": "Santiago de Cuba > Antonio Maceo",
+      "cost": 400,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-09-17T09:21:05.888Z"
     },
     {
       "id": 3,
-      "name": "Santiago de Cuba > Santiago de Cuba > Reparto Sueño",
-      "cost": 40,
+      "name": "Santiago de Cuba > Centro de la ciudad",
+      "cost": 250,
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-09-17T09:21:30.455Z"
+    },
+    {
+      "name": "Santiago de Cuba > Versalles Hasta el Hotel",
+      "cost": 500,
+      "id": 1758100929096,
+      "createdAt": "2025-09-17T09:22:09.096Z",
+      "updatedAt": "2025-09-17T09:22:09.096Z"
+    },
+    {
+      "name": "Santiago de Cuba > Carretera del Morro",
+      "cost": 300,
+      "id": 1758100944200,
+      "createdAt": "2025-09-17T09:22:24.200Z",
+      "updatedAt": "2025-09-17T09:22:24.200Z"
+    },
+    {
+      "name": "Santiago de Cuba > Altamira",
+      "cost": 400,
+      "id": 1758100965751,
+      "createdAt": "2025-09-17T09:22:45.751Z",
+      "updatedAt": "2025-09-17T09:22:45.751Z"
+    },
+    {
+      "name": "Santiago de Cuba > Cangrejitos",
+      "cost": 350,
+      "id": 1758100993856,
+      "createdAt": "2025-09-17T09:23:13.856Z",
+      "updatedAt": "2025-09-17T09:23:13.856Z"
+    },
+    {
+      "name": "Santiago de Cuba > Trocha",
+      "cost": 250,
+      "id": 1758101017063,
+      "createdAt": "2025-09-17T09:23:37.063Z",
+      "updatedAt": "2025-09-17T09:23:37.063Z"
+    },
+    {
+      "name": "Santiago de Cuba > Veguita de Galo",
+      "cost": 300,
+      "id": 1758101035400,
+      "createdAt": "2025-09-17T09:23:55.400Z",
+      "updatedAt": "2025-09-17T09:23:55.400Z"
+    },
+    {
+      "name": "Santiago de Cuba > Plaza de Martes",
+      "cost": 250,
+      "id": 1758101052903,
+      "createdAt": "2025-09-17T09:24:12.903Z",
+      "updatedAt": "2025-09-17T09:24:12.903Z"
+    },
+    {
+      "name": "Santiago de Cuba > Portuondo",
+      "cost": 300,
+      "id": 1758101091183,
+      "createdAt": "2025-09-17T09:24:51.183Z",
+      "updatedAt": "2025-09-17T09:24:51.183Z"
+    },
+    {
+      "name": "Santiago de Cuba > Sta Barbara",
+      "cost": 300,
+      "id": 1758101134159,
+      "createdAt": "2025-09-17T09:25:34.159Z",
+      "updatedAt": "2025-09-17T09:25:34.159Z"
+    },
+    {
+      "name": "Santiago de Cuba > Sueño",
+      "cost": 250,
+      "id": 1758101147999,
+      "createdAt": "2025-09-17T09:25:47.999Z",
+      "updatedAt": "2025-09-17T09:25:47.999Z"
+    },
+    {
+      "name": "Santiago de Cuba > San Pedrito",
+      "cost": 150,
+      "id": 1758101195423,
+      "createdAt": "2025-09-17T09:26:35.423Z",
+      "updatedAt": "2025-09-17T09:28:10.297Z"
+    },
+    {
+      "name": "Santiago de Cuba > Agüero",
+      "cost": 100,
+      "id": 1758101214991,
+      "createdAt": "2025-09-17T09:26:54.991Z",
+      "updatedAt": "2025-09-17T09:26:54.991Z"
+    },
+    {
+      "name": "Santiago de Cuba > Distrito Jose Martí",
+      "cost": 150,
+      "id": 1758101231864,
+      "createdAt": "2025-09-17T09:27:11.864Z",
+      "updatedAt": "2025-09-17T09:27:11.864Z"
+    },
+    {
+      "name": "Santiago de Cuba > Los Pinos",
+      "cost": 200,
+      "id": 1758101271623,
+      "createdAt": "2025-09-17T09:27:51.623Z",
+      "updatedAt": "2025-09-17T09:27:51.623Z"
+    },
+    {
+      "name": "Santiago de Cuba > Quintero",
+      "cost": 500,
+      "id": 1758101326983,
+      "createdAt": "2025-09-17T09:28:46.983Z",
+      "updatedAt": "2025-09-17T09:28:46.983Z"
+    },
+    {
+      "name": "Santiago de Cuba > 30 de noviembre bajo",
+      "cost": 400,
+      "id": 1758101359671,
+      "createdAt": "2025-09-17T09:29:19.671Z",
+      "updatedAt": "2025-09-17T09:29:19.671Z"
+    },
+    {
+      "name": "Santiago de Cuba > Rajayoga",
+      "cost": 600,
+      "id": 1758101371199,
+      "createdAt": "2025-09-17T09:29:31.199Z",
+      "updatedAt": "2025-09-17T09:29:31.199Z"
+    },
+    {
+      "name": "Santiago de Cuba > Pastorita",
+      "cost": 600,
+      "id": 1758101381527,
+      "createdAt": "2025-09-17T09:29:41.527Z",
+      "updatedAt": "2025-09-17T09:29:41.527Z"
+    },
+    {
+      "name": "Santiago de Cuba > Vista Alegre",
+      "cost": 300,
+      "id": 1758101392543,
+      "createdAt": "2025-09-17T09:29:52.543Z",
+      "updatedAt": "2025-09-17T09:29:52.543Z"
+    },
+    {
+      "name": "Santiago de Cuba > Caney",
+      "cost": 1000,
+      "id": 1758101407935,
+      "createdAt": "2025-09-17T09:30:07.935Z",
+      "updatedAt": "2025-09-17T09:30:07.935Z"
+    },
+    {
+      "name": "Santiago de Cuba > Nuevo Vista Alegre",
+      "cost": 100,
+      "id": 1758101424479,
+      "createdAt": "2025-09-17T09:30:24.479Z",
+      "updatedAt": "2025-09-17T09:30:24.479Z"
+    },
+    {
+      "name": "Santiago de Cuba > Marimón",
+      "cost": 100,
+      "id": 1758101435703,
+      "createdAt": "2025-09-17T09:30:35.703Z",
+      "updatedAt": "2025-09-17T09:30:35.703Z"
+    },
+    {
+      "name": "Santiago de Cuba > Versalle Edificios",
+      "cost": 800,
+      "id": 1758101461055,
+      "createdAt": "2025-09-17T09:31:01.055Z",
+      "updatedAt": "2025-09-17T09:31:01.055Z"
+    },
+    {
+      "name": "Santiago de Cuba > Ferreiro",
+      "cost": 300,
+      "id": 1758101481079,
+      "createdAt": "2025-09-17T09:31:21.079Z",
+      "updatedAt": "2025-09-17T09:31:21.079Z"
+    },
+    {
+      "name": "Santiago de Cuba > 30 de noviembre altos",
+      "cost": 500,
+      "id": 1758101546055,
+      "createdAt": "2025-09-17T09:32:26.055Z",
+      "updatedAt": "2025-09-17T09:32:26.055Z"
     }
   ],
   "novels": [
     {
-      "id": 2,
-      "titulo": "Elite",
-      "genero": "Drama",
-      "capitulos": 64,
-      "año": 2018,
-      "descripcion": "Las vidas de tres estudiantes de clase trabajadora cambian cuando ingresan a una escuela privada exclusiva.",
+      "id": 1,
+      "titulo": "El Turco",
+      "genero": "Acción, Drama y Romance",
+      "capitulos": 6,
+      "año": 2025,
+      "descripcion": "Balaban, un soldado del ejército jenízaro, se va a vivir a Moena, en el norte de Italia, después de la Batalla de Viena en 1683 y lucha por los derechos de la gente local.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-09-20T07:35:27.323Z"
+    },
+    {
+      "id": 2,
+      "titulo": "Holding",
+      "genero": "Familia, Drama",
+      "capitulos": 20,
+      "año": 2024,
+      "descripcion": "Aydan, campeona de apnea, se incorpora a una poderosa empresa familiar. Su presencia saca a la luz oscuros secretos y luchas de poder. Debe sortear la influencia corruptora de la riqueza sin dejar de ser fiel a sí misma.",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-09-20T07:38:27.922Z"
     },
     {
       "id": 3,
-      "titulo": "Vis a Vis",
-      "genero": "Drama",
-      "capitulos": 40,
-      "año": 2015,
-      "descripcion": "Una joven inocente es enviada a prisión donde debe aprender a sobrevivir.",
+      "titulo": "La Realeza ",
+      "genero": "Drama, Comedia",
+      "capitulos": 8,
+      "año": 2025,
+      "descripcion": "Un joven y apuesto príncipe conoce a una chica que dirige el primer hotel de lujo de la India. El encuentro de estos dos mundos, la aristocracia en decadencia y el capitalismo desenfrenado, genera un torbellino de ambición, conflicto y romance.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-09-20T07:41:35.857Z"
     },
     {
       "id": 4,
-      "titulo": "Narcos",
-      "genero": "Crimen",
+      "titulo": "Valentina, mi amor especial",
+      "genero": "Drama",
       "capitulos": 30,
-      "año": 2015,
-      "descripcion": "La historia del narcotráfico en Colombia y la lucha contra los carteles.",
+      "año": 2024,
+      "descripcion": "La historia de una niña con autismo que se convierte en un genio de la tecnología.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-09-20T07:41:00.465Z"
     },
     {
       "id": 5,
-      "titulo": "Stranger Things",
-      "genero": "Ciencia Ficción",
-      "capitulos": 42,
-      "año": 2016,
-      "descripcion": "Un grupo de niños descubre fuerzas sobrenaturales y experimentos gubernamentales secretos.",
+      "titulo": "Alaca (Cicatrices del alma)",
+      "genero": "Drama.",
+      "capitulos": 120,
+      "año": 2024,
+      "descripcion": "La vida de una niña se pone patas arriba cuando le roban el riñón durante un violento secuestro, orquestado por su padre biológico rico que necesita un donante.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-09-21T08:59:08.653Z"
     },
     {
-      "titulo": "nuevo ",
-      "genero": "drama",
-      "capitulos": 10,
+      "titulo": "Viceversa",
+      "genero": "Drama",
+      "capitulos": 80,
+      "año": 2023,
+      "descripcion": "El argumento propuesto por los guionistas Amílcar Salatti, Yoel Infante y María Claudia Figueroa parte de la historia de tres parejas de jóvenes que acuden a un concierto de música electrónica y sufren un accidente, lo que detona sucesos posteriores.",
+      "id": 1758354384106,
+      "createdAt": "2025-09-20T07:46:24.106Z",
+      "updatedAt": "2025-09-20T07:46:24.106Z"
+    },
+    {
+      "titulo": "Amar, Donde El Amor Teje Sus Redes",
+      "genero": "Drama",
+      "capitulos": 90,
       "año": 2025,
-      "descripcion": "",
-      "id": 1758056343224,
-      "createdAt": "2025-09-16T20:59:03.224Z",
-      "updatedAt": "2025-09-16T20:59:03.224Z"
+      "descripcion": "Estrella, una madre soltera, regresa al pequeño pueblo pesquero de su juventud después de la muerte de su padre. Se enamora de Fabián, un padre viudo y enfrenta un huracán de problemas que ponen en riesgo el bienestar de sus familias.",
+      "id": 1758445394324,
+      "createdAt": "2025-09-21T09:03:14.324Z",
+      "updatedAt": "2025-09-21T09:03:14.324Z"
+    },
+    {
+      "titulo": "Amor en blanco y negro",
+      "genero": "Romance",
+      "capitulos": 64,
+      "año": 2017,
+      "descripcion": "Una doctora que dedica su vida a salvar vidas es capturada por un hombre que se dedica a quitarlas.",
+      "id": 1758445503268,
+      "createdAt": "2025-09-21T09:05:03.268Z",
+      "updatedAt": "2025-09-21T09:05:03.268Z"
+    },
+    {
+      "titulo": "Amor Perfecto",
+      "genero": "Drama, Romántica",
+      "capitulos": 60,
+      "año": 2023,
+      "descripcion": "Amor Perfecto cuenta la historia de Marê (Camila Queiroz), una niña rica, estudiante de Administración y Finanzas, que se enamora del joven doctor Orlando (Diogo Almeida). Marê está de novia con Gaspar (Thiago Lacerda) pero dejará de lado los deseos de su padre para vivir ese amor. Sin embargo, la trágica muerte de su progenitor y los manejos de su madrastra para inculparla llevan a Marê a una prisión injusta.",
+      "id": 1758445741890,
+      "createdAt": "2025-09-21T09:09:01.890Z",
+      "updatedAt": "2025-09-21T09:09:01.890Z"
     }
   ],
   "settings": {
