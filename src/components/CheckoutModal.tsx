@@ -305,13 +305,13 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
               <div className="space-y-4">
                 {/* Pickup Option */}
                 <label
-                  className={`group flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
+                  className={`group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] space-y-3 sm:space-y-0 ${
                     selectedZone === 'pickup'
                       ? 'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 shadow-lg scale-[1.02]'
                       : 'border-gray-300 hover:border-green-400 hover:bg-green-50/50 hover:shadow-md'
                   }`}
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center w-full sm:w-auto">
                     <div className={`mr-4 p-3 rounded-full transition-all duration-300 ${
                       selectedZone === 'pickup'
                         ? 'bg-green-500 text-white shadow-lg'
@@ -345,7 +345,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                       </p>
                     </div>
                   </div>
-                  <div className="text-right flex flex-col items-end">
+                  <div className="text-center sm:text-right flex flex-col items-center sm:items-end w-full sm:w-auto">
                     <div className={`px-4 py-2 rounded-full font-bold text-lg transition-all duration-300 ${
                       selectedZone === 'pickup'
                         ? 'bg-green-500 text-white shadow-lg'
@@ -369,17 +369,17 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                       </h4>
                       <p className="text-xs sm:text-sm text-blue-700 ml-10 sm:ml-12 mt-1">Selecciona tu zona de entrega</p>
                     </div>
-                    <div className="max-h-48 sm:max-h-64 overflow-y-auto bg-white">
+                    <div className="max-h-60 sm:max-h-80 overflow-y-auto bg-white">
                       {deliveryZones.map((zone) => (
                         <label
                           key={zone.id}
-                          className={`group flex items-center justify-between p-3 sm:p-5 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 ${
+                          className={`group flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 space-y-3 sm:space-y-0 ${
                             selectedZone === zone.name
                               ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-inner'
                               : ''
                           }`}
                         >
-                          <div className="flex items-center">
+                          <div className="flex items-center w-full sm:w-auto">
                             <div className={`mr-4 p-2 rounded-full transition-all duration-300 ${
                               selectedZone === zone.name
                                 ? 'bg-blue-500 text-white shadow-lg'
@@ -395,7 +395,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                               onChange={(e) => handleZoneChange(e.target.value)}
                               className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500 focus:ring-2"
                             />
-                            <div>
+                            <div className="flex-1">
                               <p className={`font-bold text-sm sm:text-base transition-colors ${
                                 selectedZone === zone.name ? 'text-blue-800' : 'text-gray-900 group-hover:text-blue-700'
                               }`}>
@@ -408,7 +408,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                               </p>
                             </div>
                           </div>
-                          <div className="text-right flex flex-col items-end">
+                          <div className="text-center sm:text-right flex flex-col items-center sm:items-end w-full sm:w-auto">
                             <div className={`px-3 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-sm sm:text-base transition-all duration-300 ${
                               selectedZone === zone.name
                                 ? 'bg-blue-500 text-white shadow-lg'
@@ -427,7 +427,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
 
               {/* Location Map Option */}
               {pickupLocation && (
-                <div className="mt-6 p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-lg">
+                <div className="mt-6 p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
                     <div>
                       <h4 className="font-bold text-blue-900 text-sm sm:text-lg flex items-center">
@@ -462,7 +462,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
               )}
 
               {deliveryZones.length === 0 && (
-                <div className="text-center py-12 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200">
+                <div className="text-center py-8 sm:py-12 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200">
                   <div className="bg-yellow-100 p-4 rounded-full w-fit mx-auto mb-6">
                     <Truck className="h-12 w-12 text-yellow-600" />
                   </div>
@@ -477,7 +477,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
             </div>
 
             {/* Order Summary */}
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200 shadow-xl">
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 sm:p-6 border-2 border-blue-200 shadow-xl">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl mr-3 shadow-lg">
                   <Calculator className="h-5 w-5 text-white" />
@@ -486,16 +486,16 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
               </h3>
               
               {/* Items breakdown */}
-              <div className="bg-white rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-xl p-3 sm:p-4 mb-4 border border-gray-200 shadow-sm">
                 <h4 className="font-bold text-gray-900 mb-3 flex items-center">
                   <span className="text-base mr-2">📦</span>
                   Elementos del Pedido ({items.length})
                 </h4>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
+                <div className="space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
                   {items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 px-3 bg-gray-50 rounded-lg space-y-2 sm:space-y-0">
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900 text-sm line-clamp-1">{item.title}</p>
+                        <p className="font-medium text-gray-900 text-sm line-clamp-2">{item.title}</p>
                         <div className="flex items-center space-x-2 text-xs text-gray-600 mt-1">
                           <span className={`px-2 py-1 rounded-full ${
                             item.type === 'movie' ? 'bg-blue-100 text-blue-700' :
@@ -521,16 +521,27 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                               📊 Serie Extensa
                             </span>
                           )}
-                          <span className={`px-2 py-1 rounded-full font-medium ${
+                        </div>
+                        <div className="mt-2 sm:hidden">
+                          <span className={`px-2 py-1 rounded-full font-medium text-xs ${
                             item.paymentType === 'cash' 
                               ? 'bg-green-100 text-green-700' 
                               : 'bg-orange-100 text-orange-700'
                           }`}>
-                            {item.paymentType === 'cash' ? '💵 Efectivo' : '💳 Transfer.'}
+                            {item.paymentType === 'cash' ? '💵 Efectivo' : '💳 Transferencia'}
                           </span>
                         </div>
                       </div>
-                      <div className="text-right ml-3">
+                      <div className="text-center sm:text-right ml-0 sm:ml-3 w-full sm:w-auto">
+                        <div className="hidden sm:block mb-1">
+                          <span className={`px-2 py-1 rounded-full font-medium text-xs ${
+                            item.paymentType === 'cash' 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-orange-100 text-orange-700'
+                          }`}>
+                            {item.paymentType === 'cash' ? '💵 Efectivo' : '💳 Transferencia'}
+                          </span>
+                        </div>
                         <p className={`font-bold ${
                           item.paymentType === 'cash' ? 'text-green-600' : 'text-orange-600'
                         }`}>
@@ -544,21 +555,21 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
               </div>
               
               {/* Payment method breakdown */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                 {/* Cash payments */}
                 {items.filter(item => item.paymentType === 'cash').length > 0 && (
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border-2 border-green-200">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 sm:p-4 border-2 border-green-200">
                     <div className="flex items-center mb-2">
                       <div className="bg-green-500 p-2 rounded-lg mr-3 shadow-sm">
                         <DollarSign className="h-4 w-4 text-white" />
                       </div>
                       <h5 className="font-bold text-green-800">Pago en Efectivo</h5>
                     </div>
-                    <div className="ml-11">
+                    <div className="ml-0 sm:ml-11 text-center sm:text-left">
                       <p className="text-sm text-green-700 mb-1">
                         {items.filter(item => item.paymentType === 'cash').length} elementos
                       </p>
-                      <p className="text-xl font-bold text-green-800">
+                      <p className="text-lg sm:text-xl font-bold text-green-800">
                         ${items.filter(item => item.paymentType === 'cash')
                           .reduce((sum, item) => sum + item.price, 0).toLocaleString()} CUP
                       </p>
@@ -568,18 +579,18 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                 
                 {/* Transfer payments */}
                 {items.filter(item => item.paymentType === 'transfer').length > 0 && (
-                  <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border-2 border-orange-200">
+                  <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-3 sm:p-4 border-2 border-orange-200">
                     <div className="flex items-center mb-2">
                       <div className="bg-orange-500 p-2 rounded-lg mr-3 shadow-sm">
                         <CreditCard className="h-4 w-4 text-white" />
                       </div>
                       <h5 className="font-bold text-orange-800">Transferencia Bancaria</h5>
                     </div>
-                    <div className="ml-11">
+                    <div className="ml-0 sm:ml-11 text-center sm:text-left">
                       <p className="text-sm text-orange-700 mb-1">
                         {items.filter(item => item.paymentType === 'transfer').length} elementos (+10%)
                       </p>
-                      <p className="text-xl font-bold text-orange-800">
+                      <p className="text-lg sm:text-xl font-bold text-orange-800">
                         ${items.filter(item => item.paymentType === 'transfer')
                           .reduce((sum, item) => sum + item.price, 0).toLocaleString()} CUP
                       </p>
@@ -590,38 +601,38 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
               
               {/* Totals breakdown */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 px-4 bg-white rounded-lg border border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200 space-y-1 sm:space-y-0">
                   <span className="text-gray-700 font-medium flex items-center">
                     <span className="mr-2">🛒</span>
                     Subtotal ({items.length} elementos)
                   </span>
-                  <span className="font-bold text-gray-900">${total.toLocaleString()} CUP</span>
+                  <span className="font-bold text-gray-900 text-lg">${total.toLocaleString()} CUP</span>
                 </div>
                 
                 {selectedZone && (
-                  <div className="flex justify-between items-center py-2 px-4 bg-white rounded-lg border border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200 space-y-1 sm:space-y-0">
                     <span className="text-gray-700 font-medium flex items-center">
                       <span className="mr-2">{pickupLocation ? '🏪' : '🚚'}</span>
                       {pickupLocation ? 'Recogida en local' : `Entrega a ${selectedZone}`}
                     </span>
-                    <span className={`font-bold ${deliveryCost === 0 ? 'text-green-600' : 'text-blue-600'}`}>
+                    <span className={`font-bold text-lg ${deliveryCost === 0 ? 'text-green-600' : 'text-blue-600'}`}>
                       {deliveryCost === 0 ? '✨ GRATIS' : `$${deliveryCost.toLocaleString()} CUP`}
                     </span>
                   </div>
                 )}
                 
-                <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4 border-2 border-green-300 shadow-lg">
+                <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4 sm:p-6 border-2 border-green-300 shadow-lg">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
                       <span className="mr-2">💰</span>
                       TOTAL A PAGAR
                     </span>
-                    <span className="text-2xl font-bold text-green-600">
+                    <span className="text-xl sm:text-2xl font-bold text-green-600">
                       ${(total + deliveryCost).toLocaleString()} CUP
                     </span>
                   </div>
                   {deliveryCost > 0 && (
-                    <div className="mt-2 text-sm text-gray-600 text-center">
+                    <div className="mt-2 text-xs sm:text-sm text-gray-600 text-center">
                       Incluye ${deliveryCost.toLocaleString()} CUP de entrega
                     </div>
                   )}
@@ -632,7 +643,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-5 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 sm:px-6 py-4 sm:py-5 rounded-2xl font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center touch-manipulation"
             >
               <div className="bg-white/20 p-2 rounded-lg mr-3">
                 <Send className="h-5 w-5" />
@@ -640,7 +651,7 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
               📱 Enviar Pedido por WhatsApp
             </button>
             
-            <div className="text-center mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
+            <div className="text-center mt-4 p-3 sm:p-4 bg-green-50 rounded-xl border border-green-200">
               <p className="text-sm text-green-700 font-medium flex items-center justify-center">
                 <span className="mr-2">ℹ️</span>
                 Al enviar el pedido serás redirigido a WhatsApp para completar la transacción
