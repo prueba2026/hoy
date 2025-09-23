@@ -228,9 +228,7 @@ const EMBEDDED_CONFIG = {
       "año": 2024,
       "descripcion": "Aydan, campeona de apnea, se incorpora a una poderosa empresa familiar. Su presencia saca a la luz oscuros secretos y luchas de poder. Debe sortear la influencia corruptora de la riqueza sin dejar de ser fiel a sí misma.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-09-20T07:38:27.922Z",
-      "pais": "Turquía",
-      "estado": "finalizada"
+      "updatedAt": "2025-09-20T07:38:27.922Z"
     },
     {
       "id": 3,
@@ -240,9 +238,7 @@ const EMBEDDED_CONFIG = {
       "año": 2025,
       "descripcion": "Un joven y apuesto príncipe conoce a una chica que dirige el primer hotel de lujo de la India. El encuentro de estos dos mundos, la aristocracia en decadencia y el capitalismo desenfrenado, genera un torbellino de ambición, conflicto y romance.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-09-20T07:41:35.857Z",
-      "pais": "India",
-      "estado": "finalizada"
+      "updatedAt": "2025-09-20T07:41:35.857Z"
     },
     {
       "id": 4,
@@ -252,9 +248,7 @@ const EMBEDDED_CONFIG = {
       "año": 2024,
       "descripcion": "La historia de una niña con autismo que se convierte en un genio de la tecnología.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-09-20T07:41:00.465Z",
-      "pais": "Colombia",
-      "estado": "finalizada"
+      "updatedAt": "2025-09-20T07:41:00.465Z"
     },
     {
       "id": 5,
@@ -264,9 +258,7 @@ const EMBEDDED_CONFIG = {
       "año": 2024,
       "descripcion": "La vida de una niña se pone patas arriba cuando le roban el riñón durante un violento secuestro, orquestado por su padre biológico rico que necesita un donante.",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-09-21T08:59:08.653Z",
-      "pais": "Turquía",
-      "estado": "transmision"
+      "updatedAt": "2025-09-21T08:59:08.653Z"
     },
     {
       "titulo": "Viceversa",
@@ -276,9 +268,7 @@ const EMBEDDED_CONFIG = {
       "descripcion": "El argumento propuesto por los guionistas Amílcar Salatti, Yoel Infante y María Claudia Figueroa parte de la historia de tres parejas de jóvenes que acuden a un concierto de música electrónica y sufren un accidente, lo que detona sucesos posteriores.",
       "id": 1758354384106,
       "createdAt": "2025-09-20T07:46:24.106Z",
-      "updatedAt": "2025-09-20T07:46:24.106Z",
-      "pais": "Cuba",
-      "estado": "finalizada"
+      "updatedAt": "2025-09-20T07:46:24.106Z"
     },
     {
       "titulo": "Amar, Donde El Amor Teje Sus Redes",
@@ -354,6 +344,9 @@ export interface Novel {
   capitulos: number;
   año: number;
   descripcion?: string;
+  pais?: string;
+  imagen?: string;
+  estado?: 'transmision' | 'finalizada';
   createdAt: string;
   updatedAt: string;
 }
@@ -857,28 +850,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     broadcastChange({ type: 'delivery_zone_delete', data: { id } });
   };
 
-  const addNovel = async (novel: Omit<Novel, 'id' | 'createdAt' | 'updatedAt'>, photoFile?: File) => {
-    let photoUrl = '';
-    
-    // Handle photo upload to local storage
-    if (photoFile) {
-      try {
-        const reader = new FileReader();
-        photoUrl = await new Promise((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(photoFile);
-        });
-      } catch (error) {
-        console.error('Error processing photo:', error);
-      }
-    }
-    
-    const novelWithPhoto = {
-      ...novel,
-      foto: photoUrl
-    };
-    
+  const addNovel = (novel: Omit<Novel, 'id' | 'createdAt' | 'updatedAt'>) => {
     dispatch({ type: 'ADD_NOVEL', payload: novel });
     addNotification({
       type: 'success',
@@ -887,7 +859,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       section: 'Gestión de Novelas',
       action: 'create'
     });
-    broadcastChange({ type: 'novel_add', data: novelWithPhoto });
+    broadcastChange({ type: 'novel_add', data: novel });
   };
 
   const updateNovel = (novel: Novel) => {

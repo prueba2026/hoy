@@ -149,12 +149,13 @@ export interface NovelCartItem {
   chapters: number;
   year: number;
   description?: string;
+  country?: string;
+  status?: 'transmision' | 'finalizada';
+  image?: string;
   paymentType: 'cash' | 'transfer';
   pricePerChapter: number;
   totalPrice: number;
-  country?: string;
-  status?: 'transmision' | 'finalizada';
-  photo?: string;
+  poster_path?: string | null; // For compatibility with search
 }
 
 export type AllCartItems = CartItem | NovelCartItem;

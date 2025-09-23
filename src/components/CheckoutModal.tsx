@@ -361,31 +361,31 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                 {deliveryZones.length > 0 && (
                   <div className="border-2 border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b border-gray-300">
-                      <h4 className="font-bold text-blue-900 flex items-center text-lg">
+                      <h4 className="font-bold text-blue-900 flex items-center text-sm sm:text-lg">
                         <div className="bg-blue-500 p-2 rounded-lg mr-3 shadow-sm">
-                          <Truck className="h-5 w-5 text-white" />
+                          <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         Entrega a Domicilio
                       </h4>
-                      <p className="text-sm text-blue-700 ml-12 mt-1">Selecciona tu zona de entrega</p>
+                      <p className="text-xs sm:text-sm text-blue-700 ml-10 sm:ml-12 mt-1">Selecciona tu zona de entrega</p>
                     </div>
                     <div className="max-h-48 sm:max-h-64 overflow-y-auto bg-white">
                       {deliveryZones.map((zone) => (
                         <label
                           key={zone.id}
-                          className={`group flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 space-y-2 sm:space-y-0 ${
+                          className={`group flex items-center justify-between p-3 sm:p-5 border-b border-gray-100 last:border-b-0 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 ${
                             selectedZone === zone.name
                               ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-inner'
                               : ''
                           }`}
                         >
-                          <div className="flex items-center justify-center sm:justify-start">
+                          <div className="flex items-center">
                             <div className={`mr-4 p-2 rounded-full transition-all duration-300 ${
                               selectedZone === zone.name
                                 ? 'bg-blue-500 text-white shadow-lg'
                                 : 'bg-gray-200 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600'
                             }`}>
-                              <MapPin className="h-4 w-4" />
+                              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
                             </div>
                             <input
                               type="radio"
@@ -393,30 +393,30 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                               value={zone.name}
                               checked={selectedZone === zone.name}
                               onChange={(e) => handleZoneChange(e.target.value)}
-                              className="mr-4 h-5 w-5 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                              className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500 focus:ring-2"
                             />
                             <div>
-                              <p className={`font-bold transition-colors ${
+                              <p className={`font-bold text-sm sm:text-base transition-colors ${
                                 selectedZone === zone.name ? 'text-blue-800' : 'text-gray-900 group-hover:text-blue-700'
                               }`}>
                                 🚚 {zone.name}
                               </p>
-                              <p className={`text-xs mt-1 transition-colors ${
+                              <p className={`text-xs sm:text-sm mt-1 transition-colors ${
                                 selectedZone === zone.name ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-500'
                               }`}>
                                 ⏰ Entrega en 24-48 horas
                               </p>
                             </div>
                           </div>
-                          <div className="text-center sm:text-right flex flex-col items-center sm:items-end">
-                            <div className={`px-4 py-2 rounded-full font-bold transition-all duration-300 ${
+                          <div className="text-right flex flex-col items-end">
+                            <div className={`px-3 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-sm sm:text-base transition-all duration-300 ${
                               selectedZone === zone.name
                                 ? 'bg-blue-500 text-white shadow-lg'
                                 : 'bg-blue-100 text-blue-700 group-hover:bg-blue-200'
                             }`}>
                               ${zone.cost.toLocaleString()} CUP
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Costo de entrega</p>
+                            <p className="text-xs text-gray-500 mt-1 hidden sm:block">Costo de entrega</p>
                           </div>
                         </label>
                       ))}
@@ -427,16 +427,16 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
 
               {/* Location Map Option */}
               {pickupLocation && (
-                <div className="mt-4 sm:mt-6 p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-lg">
+                <div className="mt-6 p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 shadow-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
                     <div>
-                      <h4 className="font-bold text-blue-900 text-base sm:text-lg flex items-center">
+                      <h4 className="font-bold text-blue-900 text-sm sm:text-lg flex items-center">
                         <div className="bg-blue-500 p-2 rounded-lg mr-3 shadow-sm">
-                          <MapPin className="h-4 w-4 text-white" />
+                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                         </div>
                         📍 Ubicación del Local
                       </h4>
-                      <p className="text-sm text-blue-700 ml-11">Ver ubicación exacta en Google Maps (opcional)</p>
+                      <p className="text-xs sm:text-sm text-blue-700 ml-8 sm:ml-11">Ver ubicación exacta en Google Maps (opcional)</p>
                     </div>
                     <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3">
                       <label className="flex items-center justify-center sm:justify-start w-full sm:w-auto">
@@ -444,16 +444,16 @@ export function CheckoutModal({ isOpen, onClose, onCheckout, items, total }: Che
                           type="checkbox"
                           checked={showLocationMap}
                           onChange={(e) => setShowLocationMap(e.target.checked)}
-                          className="mr-2 h-5 w-5 text-blue-600 focus:ring-blue-500 focus:ring-2 flex-shrink-0"
+                          className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500 focus:ring-2 flex-shrink-0"
                         />
-                        <span className="text-sm font-medium text-blue-700">📍 Incluir ubicación</span>
+                        <span className="text-xs sm:text-sm font-medium text-blue-700">📍 Incluir ubicación</span>
                       </label>
                       <button
                         type="button"
                         onClick={openLocationMap}
                         className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center w-full sm:w-auto"
                       >
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                         🗺️ Ver Mapa
                       </button>
                     </div>

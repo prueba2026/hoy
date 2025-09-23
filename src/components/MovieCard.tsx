@@ -10,10 +10,9 @@ import type { Movie, TVShow, CartItem } from '../types/movie';
 interface MovieCardProps {
   item: Movie | TVShow;
   type: 'movie' | 'tv';
-  isNovel?: boolean;
 }
 
-export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
+export function MovieCard({ item, type }: MovieCardProps) {
   const { addItem, removeItem, isInCart } = useCart();
   const [showToast, setShowToast] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
@@ -23,29 +22,15 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
   const title = 'title' in item ? item.title : item.name;
   const releaseDate = 'release_date' in item ? item.release_date : item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
-  
-  // Handle novel images and regular content
-  const posterUrl = isNovel && (item as any).foto
-    ? (item as any).foto
-    : item.poster_path 
+  const posterUrl = item.poster_path 
     ? `${IMAGE_BASE_URL}/${POSTER_SIZE}${item.poster_path}`
-    : isNovel 
-      ? 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&h=750&fit=crop&crop=center'
-      : 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=500&h=750&fit=crop&crop=center';
+    : 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=500&h=750&fit=crop&crop=center';
 
   const inCart = isInCart(item.id);
 
   const handleCartAction = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Don't allow adding novels to cart from here
-    if (isNovel) {
-      setToastMessage('Las novelas se agregan desde el catálogo específico');
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-      return;
-    }
     
     setIsAddingToCart(true);
     setTimeout(() => setIsAddingToCart(false), 1000);
@@ -92,28 +77,10 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
         }`} />
         
         {/* Premium badge for high-rated content */}
-        {!isNovel && item.vote_average >= 8.0 && (
+        {item.vote_average >= 8.0 && (
           <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center z-20 shadow-sm">
             <Star className="h-3 w-3 mr-1 fill-white" />
             TOP
-          </div>
-        )}
-        
-        {/* Novel status badge */}
-        {isNovel && (item as any).status && (
-          <div className={`absolute top-3 left-3 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center z-20 shadow-sm ${
-            (item as any).status === 'transmision' 
-              ? 'bg-gradient-to-r from-red-500 to-pink-500' 
-              : 'bg-gradient-to-r from-green-500 to-emerald-500'
-          }`}>
-            {(item as any).status === 'transmision' ? '📡 LIVE' : '✅ COMPLETA'}
-          </div>
-        )}
-        
-        {/* Country badge for novels */}
-        {isNovel && (item as any).country && (
-          <div className="absolute top-3 right-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center z-20 shadow-sm">
-            🌍 {(item as any).country}
           </div>
         )}
 
@@ -163,22 +130,8 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
             {item.overview || 'Sin descripción disponible'}
           </p>
           
-          {/* Novel specific information */}
-          {isNovel && (
-            <div className="mb-4 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl border border-pink-200">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-pink-700">
-                  📚 {(item as any).chapters} capítulos
-                </span>
-                <span className="font-medium text-purple-700">
-                  📺 {(item as any).genre}
-                </span>
-              </div>
-            </div>
-          )}
-          
           {/* Episode count information for TV shows with 50+ episodes */}
-          {!isNovel && type === 'tv' && 'number_of_episodes' in item && item.number_of_episodes > 50 && (
+          {type === 'tv' && 'number_of_episodes' in item && item.number_of_episodes > 50 && (
             <div className="mb-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 shadow-sm">
               <div className="flex items-center mb-2">
                 <div className="bg-amber-500 p-1.5 rounded-lg mr-2 shadow-sm">
@@ -200,7 +153,6 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
           )}
           
           {/* Very subtle progress bar for rating */}
-          {!isNovel && (
           <div className="w-full bg-gray-200 rounded-full h-1 mb-4 overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
@@ -211,16 +163,12 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
               style={{ width: `${(item.vote_average / 10) * 100}%` }}
             />
           </div>
-          )}
 
           {/* Primary Add to Cart Button */}
           <button
             onClick={handleCartAction}
             disabled={isAddingToCart}
             className={`w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 transform relative overflow-hidden ${
-              isNovel
-                ? 'bg-pink-500 hover:bg-pink-600 text-white shadow-sm'
-                :
               inCart
                 ? 'bg-green-500 hover:bg-green-600 text-white shadow-sm'
                 : 'bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md'
@@ -232,12 +180,7 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
             )}
             
             <div className="flex items-center justify-center">
-              {isNovel ? (
-                <>
-                  <Library className="mr-2 h-4 w-4" />
-                  <span>Ver en Catálogo</span>
-                </>
-              ) : inCart ? (
+              {inCart ? (
                 <>
                   <Check className="mr-2 h-4 w-4" />
                   <span>En el Carrito</span>
@@ -258,7 +201,6 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
           </button>
 
           {/* View Details Link */}
-          {!isNovel && (
           <Link
             to={`/${type}/${item.id}`}
             className="w-full mt-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-300 text-gray-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center"
@@ -266,7 +208,6 @@ export function MovieCard({ item, type, isNovel = false }: MovieCardProps) {
             <Eye className="mr-2 h-4 w-4" />
             Ver Detalles
           </Link>
-          )}
         </div>
         
         {/* Very subtle selection indicator */}
