@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, TrendingUp, Star, Monitor, Filter, Calendar, Clock, Flame, Library, Play, Clapperboard, Sparkles } from 'lucide-react';
 import { tmdbService } from '../services/tmdb';
 import { useCart } from '../context/CartContext';
-import { useAdmin } from '../context/AdminContext';
+import { AdminContext } from '../context/AdminContext';
 import { MovieCard } from '../components/MovieCard';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -14,7 +14,7 @@ import type { Movie, TVShow } from '../types/movie';
 type TrendingTimeWindow = 'day' | 'week';
 
 export function Home() {
-  const { state: adminState, addNotification } = useAdmin();
+  const adminContext = React.useContext(AdminContext);
   const { getCurrentPrices } = useCart();
   const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
   const [popularTVShows, setPopularTVShows] = useState<TVShow[]>([]);
@@ -37,17 +37,92 @@ export function Home() {
 
   // Sincronizar novelas con el estado del admin
   useEffect(() => {
-    if (adminState.novels) {
-      const transmission = adminState.novels.filter(novel => novel.estado === 'transmision');
-      const finished = adminState.novels.filter(novel => novel.estado === 'finalizada');
+    const loadNovels = () => {
+      try {
+        // Cargar desde múltiples fuentes
+        let novels: any[] = [];
+        
+        // 1. Desde AdminContext
+        if (adminContext?.state?.novels) {
+          novels = adminContext.state.novels;
+        } else {
+          // 2. Desde localStorage como fallback
+          const adminConfig = localStorage.getItem('system_config');
+          if (adminConfig) {
+            const config = JSON.parse(adminConfig);
+            if (config.novels) {
+              novels = config.novels;
+            }
+          } else {
+            // 3. Desde admin_system_state como último recurso
+            const adminState = localStorage.getItem('admin_system_state');
+            if (adminState) {
+              const state = JSON.parse(adminState);
+              if (state.novels) {
+                novels = state.novels;
+              }
+            }
+          }
+        }
+        
+        const transmission = novels.filter(novel => novel.estado === 'transmision');
+        const finished = novels.filter(novel => novel.estado === 'finalizada');
+        
+        setNovelsInTransmission(transmission);
+        setNovelsFinished(finished);
+      } catch (error) {
+        console.error('Error loading novels:', error);
+        setNovelsInTransmission([]);
+        setNovelsFinished([]);
+      }
+    };
+
+    // Cargar novelas inicialmente
+    loadNovels();
+
+    // Escuchar cambios del AdminContext
+    const handleAdminStateChange = (event: CustomEvent) => {
+      if (event.detail.type?.includes('novel') || event.detail.type === 'novels_sync') {
+        loadNovels();
+      }
+    };
+
+    const handleAdminFullSync = (event: CustomEvent) => {
+      if (event.detail.config?.novels || event.detail.state?.novels) {
+        loadNovels();
+      }
+    };
+
+    // Escuchar cambios en localStorage
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'admin_system_state' || event.key === 'system_config') {
+        loadNovels();
+      }
+    };
+
+    // Registrar event listeners
+    window.addEventListener('admin_state_change', handleAdminStateChange as EventListener);
+    window.addEventListener('admin_full_sync', handleAdminFullSync as EventListener);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('admin_state_change', handleAdminStateChange as EventListener);
+      window.removeEventListener('admin_full_sync', handleAdminFullSync as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [adminContext?.state?.novels]);
+
+  // Efecto adicional para reaccionar a cambios directos en adminContext
+  useEffect(() => {
+    if (adminContext?.state?.novels) {
+      const transmission = adminContext.state.novels.filter(novel => novel.estado === 'transmision');
+      const finished = adminContext.state.novels.filter(novel => novel.estado === 'finalizada');
       
       setNovelsInTransmission(transmission);
       setNovelsFinished(finished);
-    } else {
-      setNovelsInTransmission([]);
-      setNovelsFinished([]);
     }
-  }, [adminState.novels]);
+  }, [adminContext?.state?.novels]);
+
   const fetchTrendingContent = async (timeWindow: TrendingTimeWindow) => {
     try {
       const response = await tmdbService.getTrendingAll(timeWindow, 1);
@@ -77,7 +152,8 @@ export function Home() {
       'Alemania': '🇩🇪',
       'Japón': '🇯🇵',
       'China': '🇨🇳',
-      'Rusia': '🇷🇺'
+      'Rusia': '🇷🇺',
+      'Cuba': '🇨🇺'
     };
     return flags[country] || '🌍';
   };

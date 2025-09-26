@@ -74,11 +74,23 @@ export class SyncManager {
     // Notificar a todos los listeners
     this.notify('novels', novels);
     
-    // Emitir eventos específicos para compatibilidad
+    // Emitir múltiples eventos para asegurar que todos los componentes se actualicen
     const event = new CustomEvent('admin_state_change', {
       detail: { type: 'novels_sync', data: novels }
     });
     window.dispatchEvent(event);
+    
+    // Evento adicional para forzar actualización
+    const forceUpdateEvent = new CustomEvent('admin_full_sync', {
+      detail: { state: { novels }, config: { novels } }
+    });
+    window.dispatchEvent(forceUpdateEvent);
+    
+    // Evento específico para novelas
+    const novelUpdateEvent = new CustomEvent('novels_updated', {
+      detail: { novels }
+    });
+    window.dispatchEvent(novelUpdateEvent);
   }
 
   // Sincronizar precios

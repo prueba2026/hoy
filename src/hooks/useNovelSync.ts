@@ -87,10 +87,43 @@ export function useNovelSync() {
 
     // Escuchar eventos personalizados del admin
     const handleAdminChange = (event: CustomEvent) => {
-      if (event.detail.type?.includes('novel') || event.detail.type === 'novels_sync') {
+      if (event.detail.type?.includes('novel') || 
+          event.detail.type === 'novels_sync' ||
+          event.detail.type === 'novel_add' ||
+          event.detail.type === 'novel_update' ||
+          event.detail.type === 'novel_delete') {
+          event.detail.type === 'novels_sync' ||
+          event.detail.type === 'novel_add' ||
+          event.detail.type === 'novel_update' ||
+          event.detail.type === 'novel_delete') {
         const currentNovels = syncManager.getCurrentData('novels');
         if (currentNovels) {
           categorizeNovels(currentNovels);
+        } else {
+          // Recargar desde localStorage si no hay datos en syncManager
+          try {
+            const adminState = localStorage.getItem('admin_system_state');
+            const systemConfig = localStorage.getItem('system_config');
+            
+            if (adminState) {
+              const state = JSON.parse(adminState);
+              if (state.novels) {
+                categorizeNovels(state.novels);
+              }
+            } else if (systemConfig) {
+              const config = JSON.parse(systemConfig);
+              if (config.novels) {
+                categorizeNovels(config.novels);
+              }
+            }
+          } catch (error) {
+            console.error('Error reloading novels from storage:', error);
+          }
+        } else {
+          // Intentar cargar directamente desde el evento
+          if (event.detail.data) {
+            categorizeNovels(event.detail.data);
+          }
         }
       }
     };
