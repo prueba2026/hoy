@@ -63,8 +63,7 @@ export function NovelCard({ novel }: NovelCardProps) {
       'Alemania': '🇩🇪',
       'Japón': '🇯🇵',
       'China': '🇨🇳',
-      'Rusia': '🇷🇺',
-      'Cuba': '🇨🇺'
+      'Rusia': '🇷🇺'
     };
     return flags[country] || '🌍';
   };
@@ -72,9 +71,6 @@ export function NovelCard({ novel }: NovelCardProps) {
   const handleCartAction = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Prevent multiple rapid clicks
-    if (isAddingToCart) return;
     
     setIsAddingToCart(true);
     setTimeout(() => setIsAddingToCart(false), 1000);
@@ -103,11 +99,8 @@ export function NovelCard({ novel }: NovelCardProps) {
       setToastMessage(`"${novel.titulo}" agregada al carrito`);
     }
     
-    // Only show toast if not already showing
-    if (!showToast) {
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    }
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const basePrice = novel.capitulos * currentPrices.novelPricePerChapter;
@@ -274,14 +267,12 @@ export function NovelCard({ novel }: NovelCardProps) {
         )}
       </div>
       
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          type={inCart ? "success" : "success"}
-          isVisible={showToast}
-          onClose={() => setShowToast(false)}
-        />
-      )}
+      <Toast
+        message={toastMessage}
+        type={inCart ? "success" : "success"}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </>
   );
 }
