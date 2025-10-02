@@ -367,6 +367,7 @@ export function NovelasModal({ isOpen, onClose, onFinalizePedido }: NovelasModal
   const getCountryFlag = (country: string) => {
     const flags: { [key: string]: string } = {
       'Turquía': '🇹🇷',
+      'Cuba': '🇨🇺',
       'México': '🇲🇽',
       'Brasil': '🇧🇷',
       'Colombia': '🇨🇴',
@@ -381,11 +382,7 @@ export function NovelasModal({ isOpen, onClose, onFinalizePedido }: NovelasModal
       'Alemania': '🇩🇪',
       'Japón': '🇯🇵',
       'China': '🇨🇳',
-      'Venezuela': '🇻🇪',
-      'Chile': '🇨🇱',
-      'Perú': '🇵🇪',
-      'Ecuador': '🇪🇨',
-      'Cuba': '🇨🇺',
+      'Rusia': '🇷🇺',
       'No especificado': '🌍'
     };
     return flags[country] || '🌍';
