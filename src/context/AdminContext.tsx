@@ -319,7 +319,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [state.syncStatus.pendingChanges]);
 
   const login = (username: string, password: string): boolean => {
-    if (username === 'admin' && password === 'admin123') {
+    const validUsername = btoa('admin');
+    const validPassword = btoa('admin123');
+
+    if (btoa(username) === validUsername && btoa(password) === validPassword) {
       dispatch({ type: 'LOGIN' });
       addNotification('Sesión iniciada correctamente', 'success');
       return true;
