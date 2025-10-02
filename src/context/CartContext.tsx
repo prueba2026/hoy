@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { Toast } from '../components/Toast';
-import type { CartItem, NovelCartItem, AllCartItems } from '../types/movie';
+import type { CartItem } from '../types/movie';
 
 // PRECIOS EMBEBIDOS - Generados automáticamente
 const EMBEDDED_PRICES = {
-  "moviePrice": 80,
+  "moviePrice": 100,
   "seriesPrice": 300,
   "transferFeePercentage": 10,
   "novelPricePerChapter": 5
@@ -16,23 +16,21 @@ interface SeriesCartItem extends CartItem {
 }
 
 interface CartState {
-  items: (SeriesCartItem | NovelCartItem)[];
+  items: SeriesCartItem[];
   total: number;
 }
 
 type CartAction = 
-  | { type: 'ADD_ITEM'; payload: SeriesCartItem | NovelCartItem }
+  | { type: 'ADD_ITEM'; payload: SeriesCartItem }
   | { type: 'REMOVE_ITEM'; payload: number }
   | { type: 'UPDATE_SEASONS'; payload: { id: number; seasons: number[] } }
   | { type: 'UPDATE_PAYMENT_TYPE'; payload: { id: number; paymentType: 'cash' | 'transfer' } }
   | { type: 'CLEAR_CART' }
-  | { type: 'LOAD_CART'; payload: (SeriesCartItem | NovelCartItem)[] }
-  | { type: 'UPDATE_PRICES'; payload: any };
+  | { type: 'LOAD_CART'; payload: SeriesCartItem[] };
 
 interface CartContextType {
   state: CartState;
-  addItem: (item: SeriesCartItem | NovelCartItem) => void;
-  addNovel: (novel: NovelCartItem) => void;
+  addItem: (item: SeriesCartItem) => void;
   removeItem: (id: number) => void;
   updateSeasons: (id: number, seasons: number[]) => void;
   updatePaymentType: (id: number, paymentType: 'cash' | 'transfer') => void;
@@ -40,10 +38,9 @@ interface CartContextType {
   isInCart: (id: number) => boolean;
   getItemSeasons: (id: number) => number[];
   getItemPaymentType: (id: number) => 'cash' | 'transfer';
-  calculateItemPrice: (item: SeriesCartItem | NovelCartItem) => number;
+  calculateItemPrice: (item: SeriesCartItem) => number;
   calculateTotalPrice: () => number;
   calculateTotalByPaymentType: () => { cash: number; transfer: number };
-  getCurrentPrices: () => any;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -63,7 +60,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: state.items.map(item => 
-          item.id === action.payload.id && item.type !== 'novel'
+          item.id === action.payload.id 
             ? { ...item, selectedSeasons: action.payload.seasons }
             : item
         )
@@ -93,9 +90,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         items: action.payload,
         total: action.payload.length
       };
-    case 'UPDATE_PRICES':
-      // Prices are now embedded, no need to update state
-      return state;
     default:
       return state;
   }
@@ -103,48 +97,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
-  const [currentPrices, setCurrentPrices] = React.useState(EMBEDDED_PRICES);
   const [toast, setToast] = React.useState<{
     message: string;
     type: 'success' | 'error';
     isVisible: boolean;
   }>({ message: '', type: 'success', isVisible: false });
-
-  // Listen for admin price updates
-  useEffect(() => {
-    const handleAdminStateChange = (event: CustomEvent) => {
-      if (event.detail.type === 'prices') {
-        setCurrentPrices(event.detail.data);
-      }
-    };
-
-    const handleAdminFullSync = (event: CustomEvent) => {
-      if (event.detail.config?.prices) {
-        setCurrentPrices(event.detail.config.prices);
-      }
-    };
-
-    window.addEventListener('admin_state_change', handleAdminStateChange as EventListener);
-    window.addEventListener('admin_full_sync', handleAdminFullSync as EventListener);
-
-    // Check for stored admin config
-    try {
-      const adminConfig = localStorage.getItem('system_config');
-      if (adminConfig) {
-        const config = JSON.parse(adminConfig);
-        if (config.prices) {
-          setCurrentPrices(config.prices);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading admin prices:', error);
-    }
-
-    return () => {
-      window.removeEventListener('admin_state_change', handleAdminStateChange as EventListener);
-      window.removeEventListener('admin_full_sync', handleAdminFullSync as EventListener);
-    };
-  }, []);
 
   // Clear cart on page refresh
   useEffect(() => {
@@ -193,11 +150,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('movieCart', JSON.stringify(state.items));
   }, [state.items]);
 
-  const addItem = (item: SeriesCartItem | NovelCartItem) => {
+  const addItem = (item: SeriesCartItem) => {
     const itemWithDefaults = { 
       ...item, 
       paymentType: 'cash' as const,
-      selectedSeasons: item.type === 'tv' && 'selectedSeasons' in item && !item.selectedSeasons ? [1] : 'selectedSeasons' in item ? item.selectedSeasons : undefined
+      selectedSeasons: item.type === 'tv' && !item.selectedSeasons ? [1] : item.selectedSeasons
     };
     dispatch({ type: 'ADD_ITEM', payload: itemWithDefaults });
     
@@ -208,15 +165,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const addNovel = (novel: NovelCartItem) => {
-    dispatch({ type: 'ADD_ITEM', payload: novel });
-    
-    setToast({
-      message: `"${novel.title}" agregada al carrito`,
-      type: 'success',
-      isVisible: true
-    });
-  };
   const removeItem = (id: number) => {
     const item = state.items.find(item => item.id === id);
     dispatch({ type: 'REMOVE_ITEM', payload: id });
@@ -248,7 +196,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const getItemSeasons = (id: number): number[] => {
     const item = state.items.find(item => item.id === id);
-    return (item && 'selectedSeasons' in item) ? item.selectedSeasons || [] : [];
+    return item?.selectedSeasons || [];
   };
 
   const getItemPaymentType = (id: number): 'cash' | 'transfer' => {
@@ -256,26 +204,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return item?.paymentType || 'cash';
   };
 
-  const getCurrentPrices = () => {
-    return currentPrices;
-  };
-
-  const calculateItemPrice = (item: SeriesCartItem | NovelCartItem): number => {
-    const moviePrice = currentPrices.moviePrice;
-    const seriesPrice = currentPrices.seriesPrice;
-    const novelPricePerChapter = currentPrices.novelPricePerChapter;
-    const transferFeePercentage = currentPrices.transferFeePercentage;
+  const calculateItemPrice = (item: SeriesCartItem): number => {
+    // Use embedded prices
+    const moviePrice = EMBEDDED_PRICES.moviePrice;
+    const seriesPrice = EMBEDDED_PRICES.seriesPrice;
+    const transferFeePercentage = EMBEDDED_PRICES.transferFeePercentage;
     
-    if (item.type === 'novel') {
-      const novelItem = item as NovelCartItem;
-      const basePrice = novelItem.chapters * novelPricePerChapter;
-      return item.paymentType === 'transfer' ? Math.round(basePrice * (1 + transferFeePercentage / 100)) : basePrice;
-    } else if (item.type === 'movie') {
+    if (item.type === 'movie') {
       const basePrice = moviePrice;
       return item.paymentType === 'transfer' ? Math.round(basePrice * (1 + transferFeePercentage / 100)) : basePrice;
     } else {
-      const seriesItem = item as SeriesCartItem;
-      const seasons = seriesItem.selectedSeasons?.length || 1;
+      const seasons = item.selectedSeasons?.length || 1;
       const basePrice = seasons * seriesPrice;
       return item.paymentType === 'transfer' ? Math.round(basePrice * (1 + transferFeePercentage / 100)) : basePrice;
     }
@@ -288,23 +227,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const calculateTotalByPaymentType = (): { cash: number; transfer: number } => {
-    const moviePrice = currentPrices.moviePrice;
-    const seriesPrice = currentPrices.seriesPrice;
-    const novelPricePerChapter = currentPrices.novelPricePerChapter;
-    const transferFeePercentage = currentPrices.transferFeePercentage;
+    const moviePrice = EMBEDDED_PRICES.moviePrice;
+    const seriesPrice = EMBEDDED_PRICES.seriesPrice;
+    const transferFeePercentage = EMBEDDED_PRICES.transferFeePercentage;
     
     return state.items.reduce((totals, item) => {
-      let basePrice: number;
-      if (item.type === 'novel') {
-        const novelItem = item as NovelCartItem;
-        basePrice = novelItem.chapters * novelPricePerChapter;
-      } else if (item.type === 'movie') {
-        basePrice = moviePrice;
-      } else {
-        const seriesItem = item as SeriesCartItem;
-        basePrice = (seriesItem.selectedSeasons?.length || 1) * seriesPrice;
-      }
-      
+      const basePrice = item.type === 'movie' ? moviePrice : (item.selectedSeasons?.length || 1) * seriesPrice;
       if (item.paymentType === 'transfer') {
         totals.transfer += Math.round(basePrice * (1 + transferFeePercentage / 100));
       } else {
@@ -322,7 +250,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider value={{ 
       state, 
       addItem, 
-      addNovel,
       removeItem, 
       updateSeasons, 
       updatePaymentType,
@@ -332,8 +259,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       getItemPaymentType,
       calculateItemPrice,
       calculateTotalPrice,
-      calculateTotalByPaymentType,
-      getCurrentPrices
+      calculateTotalByPaymentType
     }}>
       {children}
       <Toast
