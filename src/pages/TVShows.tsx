@@ -11,6 +11,7 @@ type TVCategory = 'popular' | 'top_rated' | 'airing_today' | 'on_the_air';
 
 export function TVShows() {
   const [category, setCategory] = useState<TVCategory>('popular');
+  const [isChangingCategory, setIsChangingCategory] = useState(false);
 
   const categoryTitles = {
     popular: 'Populares',
@@ -38,7 +39,12 @@ export function TVShows() {
   );
 
   const handleCategoryChange = (newCategory: TVCategory) => {
-    setCategory(newCategory);
+    if (newCategory === category) return;
+    setIsChangingCategory(true);
+    setTimeout(() => {
+      setCategory(newCategory);
+      setIsChangingCategory(false);
+    }, 150);
   };
 
   if (loading && tvShows.length === 0) {
@@ -100,9 +106,17 @@ export function TVShows() {
         </div>
 
         {/* TV Shows Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-          {tvShows.map((show) => (
-            <MovieCard key={`${show.id}-${category}`} item={show} type="tv" />
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-300 ${
+          isChangingCategory ? 'opacity-50' : 'opacity-100'
+        }`}>
+          {tvShows.map((show, index) => (
+            <div
+              key={`${show.id}-${category}`}
+              className="animate-fade-slide-up"
+              style={{ animationDelay: `${index * 30}ms` }}
+            >
+              <MovieCard item={show} type="tv" />
+            </div>
           ))}
         </div>
 

@@ -11,6 +11,7 @@ type AnimeCategory = 'popular' | 'top_rated';
 
 export function Anime() {
   const [category, setCategory] = useState<AnimeCategory>('popular');
+  const [isChangingCategory, setIsChangingCategory] = useState(false);
 
   const categoryTitles = {
     popular: 'Populares',
@@ -32,7 +33,12 @@ export function Anime() {
   );
 
   const handleCategoryChange = (newCategory: AnimeCategory) => {
-    setCategory(newCategory);
+    if (newCategory === category) return;
+    setIsChangingCategory(true);
+    setTimeout(() => {
+      setCategory(newCategory);
+      setIsChangingCategory(false);
+    }, 150);
   };
 
   if (loading && animeList.length === 0) {
@@ -97,9 +103,17 @@ export function Anime() {
         </div>
 
         {/* Anime Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-          {animeList.map((anime) => (
-            <MovieCard key={`${anime.id}-${category}`} item={anime} type="tv" />
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-300 ${
+          isChangingCategory ? 'opacity-50' : 'opacity-100'
+        }`}>
+          {animeList.map((anime, index) => (
+            <div
+              key={`${anime.id}-${category}`}
+              className="animate-fade-slide-up"
+              style={{ animationDelay: `${index * 30}ms` }}
+            >
+              <MovieCard item={anime} type="tv" />
+            </div>
           ))}
         </div>
 

@@ -11,6 +11,7 @@ type MovieCategory = 'popular' | 'top_rated' | 'upcoming' | 'now_playing';
 
 export function Movies() {
   const [category, setCategory] = useState<MovieCategory>('popular');
+  const [isChangingCategory, setIsChangingCategory] = useState(false);
 
   const categoryTitles = {
     popular: 'Populares',
@@ -38,7 +39,12 @@ export function Movies() {
   );
 
   const handleCategoryChange = (newCategory: MovieCategory) => {
-    setCategory(newCategory);
+    if (newCategory === category) return;
+    setIsChangingCategory(true);
+    setTimeout(() => {
+      setCategory(newCategory);
+      setIsChangingCategory(false);
+    }, 150);
   };
 
   if (loading && movies.length === 0) {
@@ -100,9 +106,17 @@ export function Movies() {
         </div>
 
         {/* Movies Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-          {movies.map((movie) => (
-            <MovieCard key={`${movie.id}-${category}`} item={movie} type="movie" />
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-300 ${
+          isChangingCategory ? 'opacity-50' : 'opacity-100'
+        }`}>
+          {movies.map((movie, index) => (
+            <div
+              key={`${movie.id}-${category}`}
+              className="animate-fade-slide-up"
+              style={{ animationDelay: `${index * 30}ms` }}
+            >
+              <MovieCard item={movie} type="movie" />
+            </div>
           ))}
         </div>
 

@@ -1,4 +1,4 @@
-# Touch Swipe & Responsive Filters - Version 3
+# Touch Swipe & Responsive Filters - Version 3.2
 
 ## Características Implementadas
 
@@ -7,6 +7,7 @@
 #### Componentes Mejorados:
 - **NetflixSection.tsx**: Carruseles de películas, series y anime en Home
 - **NetflixNovelSection.tsx**: Carrusel de novelas en el modal
+- **HeroCarousel.tsx** (V3.2): Carousel hero con swipe y botones móviles
 
 #### Funcionalidad:
 - **Gestos táctiles mejorados**: Deslizar con los dedos con detección de velocidad
@@ -183,6 +184,52 @@ src/
 - [x] Contador de resultados
 - [x] Mejor jerarquía visual
 
+## Nuevas Mejoras en V3.2
+
+- [x] Touch swipe en HeroCarousel
+- [x] Botones semi-visibles en móvil para carousel
+- [x] Animaciones de fade con retraso escalonado
+- [x] Transición suave al cambiar categorías
+- [x] Staggered animations en grid items
+- [x] Ripple effect en botones
+- [x] Hover lift animations
+- [x] Touch feedback mejorado
+- [x] Swipe hint animations
+- [x] Optimización de umbrales de swipe por contexto
+
+## Detalles de Implementación V3.2
+
+### HeroCarousel con Touch Swipe
+- **Umbral reducido**: 50px de distancia (más sensible que carruseles de contenido)
+- **Velocidad ajustada**: 0.3 (más fácil de activar con swipes rápidos)
+- **Touch-pan-y**: Permite scroll vertical en el resto de la página
+- **Botones semi-visibles**: 50% de opacidad en móvil, 100% al presionar
+- **GPU acceleration**: translateZ(0) durante el swipe para mejor rendimiento
+
+### Animaciones Escalonadas en Grids
+- **Delay progresivo**: 30ms por item para efecto cascada
+- **Fade + slide-up**: Los items aparecen desde abajo con fade
+- **Transición de categoría**: Fade out del grid durante el cambio
+- **Prevención de spam**: No permite cambio hasta completar transición anterior
+
+### Nuevas Clases CSS V3.2
+```css
+.animate-stagger          /* Fade in escalonado con scale */
+.animate-ripple           /* Efecto de onda en clicks */
+.hover-lift               /* Elevación suave en hover */
+.touch-feedback           /* Feedback táctil (scale down) */
+.page-enter               /* Animación de entrada de página */
+.animate-filter-active    /* Animación al activar filtro */
+.animate-swipe-hint       /* Indicador de swipe disponible */
+```
+
+### Optimizaciones de Performance
+- **RequestAnimationFrame**: Para animaciones de progreso suaves
+- **Throttle en goToSlide**: Previene clicks/taps rápidos
+- **Lazy animation delays**: Solo se aplican cuando hay contenido
+- **Preload de imágenes**: HeroCarousel precarga siguiente/anterior
+- **Memoización**: Callbacks optimizados con useCallback
+
 ## Próximas Mejoras Potenciales
 
 - [ ] Swipe vertical para cambiar entre secciones
@@ -191,3 +238,4 @@ src/
 - [ ] Infinite scroll en carruseles
 - [ ] Gesture de pellizco para ver detalles
 - [ ] Haptic feedback en dispositivos compatibles
+- [ ] Swipe progress indicator en tiempo real
