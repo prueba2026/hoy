@@ -260,4 +260,57 @@
   .swipe-feedback {
     animation: swipe-feedback 0.3s ease-out;
   }
+
+  /* Enhanced button animations */
+  @keyframes button-press {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-button-press {
+    animation: button-press 0.2s ease-out;
+  }
+
+  /* Smooth scale transform */
+  .scale-102 {
+    transform: scale(1.02);
+  }
+
+  /* Enhanced filter card animations */
+  @keyframes fade-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-slide-up {
+    animation: fade-slide-up 0.4s ease-out;
+  }
+
+  /* Gradient animations for selected buttons */
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
 }

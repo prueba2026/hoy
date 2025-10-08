@@ -50,11 +50,12 @@ export function NetflixNovelSection({ novels }: NetflixNovelSectionProps) {
     }
   };
 
-  const { handleTouchStart, handleTouchMove, handleTouchEnd } = useTouchSwipe({
+  const { handleTouchStart, handleTouchMove, handleTouchEnd, swipeVelocity } = useTouchSwipe({
     scrollRef,
     onSwipeLeft: () => canScrollLeft && scroll('left'),
     onSwipeRight: () => canScrollRight && scroll('right'),
-    threshold: 75
+    threshold: 75,
+    velocityThreshold: 0.5
   });
 
   React.useEffect(() => {
@@ -107,11 +108,12 @@ export function NetflixNovelSection({ novels }: NetflixNovelSectionProps) {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="overflow-x-auto scrollbar-hide touch-pan-x"
+        className="overflow-x-auto scrollbar-hide touch-pan-x swipe-container momentum-scroll"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
+          transform: swipeVelocity > 0 ? 'translateZ(0)' : undefined
         }}
       >
         <div className="flex gap-4 pb-4" style={{ minWidth: 'min-content' }}>

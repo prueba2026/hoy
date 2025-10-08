@@ -63,30 +63,36 @@ export function TVShows() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
-            <Monitor className="mr-3 h-8 w-8 text-purple-600" />
+            <Monitor className="mr-3 h-8 w-8 text-emerald-600" />
             <h1 className="text-3xl font-bold text-gray-900">
               Series {categoryTitles[category]}
             </h1>
           </div>
 
           {/* Category Filter */}
-          <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm w-full">
-            <div className="flex items-center mb-3">
-              <Filter className="h-4 w-4 text-gray-500 mr-2" />
-              <span className="text-sm font-medium text-gray-700">Categoría:</span>
+          <div className="bg-white rounded-lg p-4 sm:p-5 shadow-md border border-gray-100 w-full">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Filter className="h-5 w-5 text-emerald-600 mr-2" />
+                <span className="text-sm sm:text-base font-semibold text-gray-800">Categoría</span>
+              </div>
+              <span className="text-xs text-gray-500 hidden sm:inline">{tvShows.length} resultados</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {Object.entries(categoryTitles).map(([key, title]) => (
                 <button
                   key={key}
                   onClick={() => handleCategoryChange(key as TVCategory)}
-                  className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 ${
+                  className={`relative px-4 py-3 sm:py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 transform ${
                     category === key
-                      ? 'bg-purple-600 text-white shadow-md transform scale-105'
-                      : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50 border border-gray-200'
+                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg shadow-emerald-500/50 scale-105 ring-2 ring-emerald-400 ring-offset-2'
+                      : 'bg-gray-50 text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 hover:scale-102 border border-gray-200 hover:border-emerald-300 hover:shadow-md'
                   }`}
                 >
-                  {title}
+                  <span className="relative z-10">{title}</span>
+                  {category === key && (
+                    <span className="absolute inset-0 bg-white/20 rounded-xl animate-pulse"></span>
+                  )}
                 </button>
               ))}
             </div>
@@ -106,7 +112,7 @@ export function TVShows() {
             <button
               onClick={loadMore}
               disabled={loading}
-              className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-8 py-3 rounded-lg font-medium transition-colors"
             >
               {loading ? 'Cargando...' : 'Cargar más series'}
             </button>
