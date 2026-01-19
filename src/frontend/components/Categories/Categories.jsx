@@ -71,7 +71,7 @@ const Categories = () => {
             Clear Filter
           </button>
         </div>
-      )}
+       )}
     </section>
   );
 };

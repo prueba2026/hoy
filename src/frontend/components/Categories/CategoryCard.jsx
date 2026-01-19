@@ -7,7 +7,6 @@ const CategoryCard = ({ category, variant = 'default' }) => {
   const { checkCategoryOnTabClick } = useFiltersContext();
 
   const {
-    _id,
     categoryName,
     displayName,
     categoryImage,
