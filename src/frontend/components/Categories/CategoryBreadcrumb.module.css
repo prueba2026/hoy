@@ -1,0 +1,66 @@
+.breadcrumb {
+  background: var(--white);
+  padding: 1rem;
+  border-radius: var(--borderRadius);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 1rem;
+}
+
+.breadcrumbList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumbLink {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--grey-600);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.breadcrumbLink:hover {
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
+.homeIcon {
+  font-size: 0.9rem;
+}
+
+.separator {
+  color: var(--grey-400);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.current {
+  color: var(--primary-600);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+@media screen and (min-width: 768px) {
+  .breadcrumbLink {
+    font-size: 1rem;
+  }
+
+  .current {
+    font-size: 1rem;
+  }
+}

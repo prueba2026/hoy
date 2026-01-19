@@ -1,40 +1,77 @@
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import Title from '../Title/Title';
 import styles from './Categories.module.css';
 import { useAllProductsContext } from '../../contexts/ProductsContextProvider';
-import { useFiltersContext } from '../../contexts/FiltersContextProvider';
+import CategoryCard from './CategoryCard';
+import CategoryFilter from './CategoryFilter';
 
 const Categories = () => {
-  const navigate = useNavigate();
-
   const { categories: categoriesFromContext } = useAllProductsContext();
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [filterText, setFilterText] = useState('');
 
-  const { checkCategoryOnTabClick } = useFiltersContext();
+  // Filter categories based on search text
+  const filteredCategories = categoriesFromContext.filter(category =>
+    category.displayName.toLowerCase().includes(filterText.toLowerCase()) ||
+    category.description.toLowerCase().includes(filterText.toLowerCase()) ||
+    category.subcategories?.some(sub => 
+      sub.name.toLowerCase().includes(filterText.toLowerCase())
+    )
+  );
 
-  const handleCategoryClick = (categoryNameClicked) => {
-    // update the category in filtersContext
-    checkCategoryOnTabClick(categoryNameClicked);
-    // then
-    // navigate to products
-    navigate('/products');
+  // Sort categories by sortOrder
+  const sortedCategories = filteredCategories.sort((a, b) => 
+    (a.sortOrder || 999) - (b.sortOrder || 999)
+  );
+
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+  };
+
+  const handleFilterChange = (text) => {
+    setFilterText(text);
   };
 
   return (
     <section className='section'>
       <Title>Categories</Title>
 
+      <CategoryFilter
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        filterText={filterText}
+        onFilterChange={handleFilterChange}
+        totalCategories={categoriesFromContext.length}
+        filteredCount={sortedCategories.length}
+      />
+
       <div className={`container ${styles.categoryContainer}`}>
-        {categoriesFromContext.map(({ _id, categoryName, categoryImage }) => (
-          <article
-            key={_id}
-            className={styles.category}
-            onClick={() => handleCategoryClick(categoryName)}
-          >
-            <img src={categoryImage} alt={categoryName} />
-            <div>{categoryName}</div>
-          </article>
-        ))}
+        <div className={
+          viewMode === 'grid' 
+            ? styles.gridContainer 
+            : styles.listContainer
+        }>
+          {sortedCategories.map((category) => (
+            <CategoryCard
+              key={category._id}
+              category={category}
+              variant={viewMode === 'list' ? 'compact' : 'default'}
+            />
+          ))}
+        </div>
       </div>
+
+      {sortedCategories.length === 0 && (
+        <div className={styles.noResults}>
+          <p>No categories found matching "{filterText}"</p>
+          <button 
+            className='btn btn-hipster'
+            onClick={() => setFilterText('')}
+          >
+            Clear Filter
+          </button>
+        </div>
+        ))}
     </section>
   );
 };

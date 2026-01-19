@@ -8,6 +8,7 @@ import FeaturedProducts from './FeaturedProducts/FeaturedProducts';
 import Title from './Title/Title';
 import ProductCard from './ProductCard/ProductCard';
 import Categories from './Categories/Categories';
+import { CategoryCard, CategoryFilter, CategoryBreadcrumb } from './Categories';
 import Filters from './Filters/Filters';
 import ProductsList from './ProductsList/ProductsList';
 import LoginAndSignupLayout from './LoginAndSignupLayout';
@@ -34,6 +35,9 @@ export {
   Title,
   ProductCard,
   Categories,
+  CategoryCard,
+  CategoryFilter,
+  CategoryBreadcrumb,
   Filters,
   ProductsList,
   LoginAndSignupLayout,
